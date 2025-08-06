@@ -12,9 +12,9 @@
         /// <returns></returns>
         public static IServiceCollection AddMongoUtils(this IServiceCollection services)
         {
-            services.TryAddTransient<IMongoRepository, MongoRepository>();
-            services.TryAddTransient(typeof(IMongoRepository<>), typeof(MongoRepository<>));
-            services.TryAddTransient(typeof(IMongoRepository<,>), typeof(MongoRepository<,>));
+            services.TryAddScoped<IMongoRepository, MongoRepository>();
+            services.TryAddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+            services.TryAddScoped(typeof(IMongoRepository<,>), typeof(MongoRepository<,>));
             return services;
         }
     }

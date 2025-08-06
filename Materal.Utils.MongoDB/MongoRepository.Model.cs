@@ -46,15 +46,7 @@ namespace Materal.Utils.MongoDB
             if (string.IsNullOrWhiteSpace(ConnectionString)) throw new MongoUtilException($"链接字符串为空");
             if (string.IsNullOrWhiteSpace(DatabaseName)) throw new MongoUtilException($"数据库名称为空");
             if (string.IsNullOrWhiteSpace(CollectionName)) throw new MongoUtilException($"集合名称为空");
-            MongoClient client;
-            try
-            {
-                client = new(ConnectionString);
-            }
-            catch (Exception ex)
-            {
-                throw new MongoUtilException($"链接数据库失败", ex);
-            }
+            MongoClient client = MongoClientManager.Instance.GetClient(ConnectionString);
             IMongoDatabase db = client.GetDatabase(DatabaseName);
             IAsyncCursor<string> collectionNames = await db.ListCollectionNamesAsync(new ListCollectionNamesOptions
             {
@@ -67,6 +59,7 @@ namespace Materal.Utils.MongoDB
             IMongoCollection<T> collection = db.GetCollection<T>(CollectionName);
             return collection;
         }
+
         /// <summary>
         /// 获取集合
         /// </summary>
@@ -77,15 +70,7 @@ namespace Materal.Utils.MongoDB
             if (string.IsNullOrWhiteSpace(ConnectionString)) throw new MongoUtilException($"链接字符串为空");
             if (string.IsNullOrWhiteSpace(DatabaseName)) throw new MongoUtilException($"数据库名称为空");
             if (string.IsNullOrWhiteSpace(CollectionName)) throw new MongoUtilException($"集合名称为空");
-            MongoClient client;
-            try
-            {
-                client = new(ConnectionString);
-            }
-            catch (Exception ex)
-            {
-                throw new MongoUtilException($"链接数据库失败", ex);
-            }
+            MongoClient client = MongoClientManager.Instance.GetClient(ConnectionString);
             IMongoDatabase db = client.GetDatabase(DatabaseName);
             IAsyncCursor<string> collectionNames = db.ListCollectionNames(new ListCollectionNamesOptions
             {
