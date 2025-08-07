@@ -1,0 +1,81 @@
+﻿using System.Collections;
+
+namespace Materal.Utils.AutoMapper
+{
+    /// <summary>
+    /// 映射器
+    /// </summary>
+    public class Mapper : IMapper
+    {
+        /// <inheritdoc/>
+        public T Map<T>(object source)
+        {
+            Type targetType = typeof(T);
+            T target = targetType.Instantiation<T>();
+            Map(source, target!);
+            return target;
+        }
+        /// <inheritdoc/>
+        public void Map(object source, object target)
+        {
+            Type sourceType = source.GetType();
+            Type targetType = target.GetType();
+            if (sourceType.IsAssignableTo<IList>() && targetType.IsAssignableTo<IList>())
+            {
+                Type trueTargetType = targetType.GetGenericArguments().FirstOrDefault() ?? throw new MateralAutoMapperException("获取列表类型失败");
+                MapList((IList)source, (IList)target);
+                return;
+            }
+            MappingRelation? mappingRelation = ProfileManager.MappingRelations.FirstOrDefault(m => m.SourceType == sourceType && m.TargetType == targetType);
+            MapObject(source, target, mappingRelation);
+        }
+        private void MapList(IList source, IList target)
+        {
+            Type sourceType = source.GetType();
+            Type targetType = target.GetType();
+            Type trueSourceType = sourceType.GetGenericArguments().FirstOrDefault() ?? throw new MateralAutoMapperException("获取列表类型失败");
+            Type trueTargetType = targetType.GetGenericArguments().FirstOrDefault() ?? throw new MateralAutoMapperException("获取列表类型失败");
+            MappingRelation? mappingRelation = ProfileManager.MappingRelations.FirstOrDefault(m => m.SourceType == trueSourceType && m.TargetType == trueTargetType);
+            foreach (object? item in source)
+            {
+                if (item is null)
+                {
+                    target.Add(default!);
+                }
+                else
+                {
+                    object tItem = trueTargetType.Instantiation();
+                    MapObject(item, tItem, mappingRelation);
+                    target.Add(tItem);
+                }
+            }
+        }
+        private static void MapObject(object source, object target)
+        {
+            try
+            {
+                source.CopyProperties(target);
+            }
+            catch (Exception ex)
+            {
+                throw new MateralAutoMapperException("映射结果转换失败", ex);
+            }
+        }
+        private void MapObject(object source, object target, MappingRelation? mappingRelation)
+        {
+            try
+            {
+                if (mappingRelation is null)
+                {
+                    MapObject(source, target);
+                    return;
+                }
+                mappingRelation.MapObj(this, source, target);
+            }
+            catch (Exception ex)
+            {
+                throw new MateralAutoMapperException("映射结果转换失败", ex);
+            }
+        }
+    }
+}
