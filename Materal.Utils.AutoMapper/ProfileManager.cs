@@ -1,19 +1,22 @@
-﻿namespace Materal.Utils.AutoMapper
+﻿using Materal.Extensions.DependencyInjection;
+
+namespace Materal.Utils.AutoMapper;
+
+/// <summary>
+/// 配置管理器
+/// </summary>
+internal static class ProfileManager
 {
-    /// <summary>
-    /// 配置管理器
-    /// </summary>
-    internal static class ProfileManager
+    public static List<MappingRelation> MappingRelations { get; } = [];
+    public static AutoMapperConfig Config = new();
+    public static void Init()
     {
-        public static List<MappingRelation> MappingRelations { get; } = [];
-        public static AutoMapperConfig Config = new();
-        public static void Init()
+        foreach (Type profileType in Config.ProfileTypes)
         {
-            foreach (Type profileType in Config.ProfileTypes)
-            {
-                Profile profile = profileType.Instantiation<Profile>();
-                MappingRelations.AddRange(profile.MappingRelations);
-            }
+            Profile profile = MateralServices.ServiceProvider is null
+                ? profileType.Instantiation<Profile>()
+                : profileType.Instantiation<Profile>(MateralServices.ServiceProvider);
+            MappingRelations.AddRange(profile.MappingRelations);
         }
     }
 }

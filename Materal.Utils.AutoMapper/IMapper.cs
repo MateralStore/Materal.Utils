@@ -6,6 +6,10 @@
     public interface IMapper
     {
         /// <summary>
+        /// 服务容器
+        /// </summary>
+        public IServiceProvider? ServiceProvider { get; }
+        /// <summary>
         /// 映射
         /// </summary>
         /// <typeparam name="T"></typeparam>

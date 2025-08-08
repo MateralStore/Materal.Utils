@@ -5,13 +5,15 @@ namespace Materal.Utils.AutoMapper
     /// <summary>
     /// 映射器
     /// </summary>
-    public class Mapper : IMapper
+    public class Mapper(IServiceProvider? serviceProvider = null) : IMapper
     {
+        /// <inheritdoc/>
+        public IServiceProvider? ServiceProvider { get; } = serviceProvider;
         /// <inheritdoc/>
         public T Map<T>(object source)
         {
             Type targetType = typeof(T);
-            T target = targetType.Instantiation<T>();
+            T target = ServiceProvider is null ? targetType.Instantiation<T>() : targetType.Instantiation<T>(ServiceProvider);
             Map(source, target!);
             return target;
         }
@@ -44,7 +46,7 @@ namespace Materal.Utils.AutoMapper
                 }
                 else
                 {
-                    object tItem = trueTargetType.Instantiation();
+                    object tItem = ServiceProvider is null ? trueTargetType.Instantiation() : trueTargetType.Instantiation(ServiceProvider);
                     MapObject(item, tItem, mappingRelation);
                     target.Add(tItem);
                 }

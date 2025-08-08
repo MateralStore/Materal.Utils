@@ -13,7 +13,7 @@
         /// <typeparam name="T2"></typeparam>
         /// <param name="map"></param>
         /// <param name="reverseMap"></param>
-        protected void CreateMap<T1, T2>(Action<IMapper, T1, T2> map, Action<IMapper, T2, T1>? reverseMap = null)
+        protected void CreateMap<T1, T2>(Action<IMapper, T1, T2?> map, Action<IMapper, T2, T1?>? reverseMap = null)
         {
             MappingRelations.Add(new MappingRelation<T1, T2>(map));
             if (reverseMap is not null)
