@@ -17,7 +17,16 @@ public static class ServiceCollectionExtension
     {
         services.TryAddSingleton<IMapper, Mapper>();
         configAction?.Invoke(ProfileManager.Config);
-        ProfileManager.Init();
+        return services;
+    }
+    /// <summary>
+    /// 使用AutoMapper
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
+    public static IServiceProvider UseAutoMapper(this IServiceProvider services)
+    {
+        ProfileManager.Init(services);
         return services;
     }
 }

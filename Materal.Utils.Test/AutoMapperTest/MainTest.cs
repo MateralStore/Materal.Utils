@@ -16,6 +16,12 @@ public partial class MainTest : MateralTestBase
             config.AddMaps(GetType().Assembly);
         });
     }
+    protected override IServiceProvider BuilderServiceProvider(IServiceCollection services)
+    {
+        IServiceProvider? serviceProvider = base.BuilderServiceProvider(services);
+        serviceProvider.UseAutoMapper();
+        return serviceProvider;
+    }
     /// <summary>
     /// 无配置文件测试
     /// </summary>

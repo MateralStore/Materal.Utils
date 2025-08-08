@@ -6,7 +6,6 @@
 		<Description>Materal自动映射工具包</Description>
 	</PropertyGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\Materal.Extensions\Materal.Extensions.DependencyInjection\Materal.Extensions.DependencyInjection.csproj" />
 		<ProjectReference Include="..\..\Materal.Extensions\Materal.Extensions\Materal.Extensions.csproj" />
 	</ItemGroup>
 </Project>
