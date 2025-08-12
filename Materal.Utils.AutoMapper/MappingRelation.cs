@@ -14,6 +14,10 @@
         /// </summary>
         public abstract Type TargetType { get; }
         /// <summary>
+        /// 使用默认的映射
+        /// </summary>
+        public bool UseDefaultMapper { get; protected set; }
+        /// <summary>
         /// 映射方法
         /// </summary>
         public Action<IMapper, object, object?> MapObj { get; protected set; } = (mapper, source, target) => { };
@@ -36,9 +40,11 @@
         /// 构造方法
         /// </summary>
         /// <param name="map"></param>
-        public MappingRelation(Action<IMapper, T1, T2?> map)
+        /// <param name="useDefaultMapper"></param>
+        public MappingRelation(Action<IMapper, T1, T2?> map, bool useDefaultMapper)
         {
             Map = map;
+            UseDefaultMapper = useDefaultMapper;
             MapObj = (mapper, source, target) => Map(mapper, (T1)source, target is null ? default : (T2)target);
         }
     }

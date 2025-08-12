@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.AutoMapper;
+namespace Materal.Utils.AutoMapper;
 
 /// <summary>
 /// 配置管理器
@@ -14,6 +14,10 @@ internal static class ProfileManager
             Profile profile = serviceProvider is null
                 ? profileType.Instantiation<Profile>()
                 : profileType.Instantiation<Profile>(serviceProvider);
+            if (MappingRelations.Any(m => profile.MappingRelations.Any(pm => pm.SourceType == m.SourceType && pm.TargetType == m.TargetType)))
+            {
+                throw new MateralAutoMapperException("MappingRelations映射关系重复");
+            }
             MappingRelations.AddRange(profile.MappingRelations);
         }
     }

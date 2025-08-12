@@ -5,10 +5,22 @@ namespace Materal.Utils.AutoMapper
     /// <summary>
     /// 映射器
     /// </summary>
-    public class Mapper(IServiceProvider? serviceProvider = null) : IMapper
+    public partial class Mapper : IMapper
     {
         /// <inheritdoc/>
-        public IServiceProvider? ServiceProvider { get; } = serviceProvider;
+        public IServiceProvider? ServiceProvider { get; }
+
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        public Mapper(IServiceProvider? serviceProvider = null)
+        {
+            ServiceProvider = serviceProvider;
+            MethodInfo[] methodInfos = typeof(IMapper).GetMethods();
+            _mapperGenericMethod = methodInfos.First(m => m.Name == nameof(Map) && m.IsGenericMethod);
+            _mapperMethod = methodInfos.First(m => m.Name == nameof(Map) && !m.IsGenericMethod);
+        }
         /// <inheritdoc/>
         public T Map<T>(object source)
         {
@@ -52,25 +64,25 @@ namespace Materal.Utils.AutoMapper
                 }
             }
         }
-        private static void MapObject(object source, object target)
-        {
-            try
-            {
-                source.CopyProperties(target);
-            }
-            catch (Exception ex)
-            {
-                throw new MateralAutoMapperException("映射结果转换失败", ex);
-            }
-        }
-        private void MapObject(object source, object target, MappingRelation? mappingRelation)
+        /// <summary>
+        /// 映射Object
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <param name="mappingRelation"></param>
+        /// <exception cref="MateralAutoMapperException"></exception>
+        private void MapObject(object source, object target, MappingRelation? mappingRelation = null)
         {
             try
             {
                 if (mappingRelation is null)
                 {
-                    MapObject(source, target);
+                    DefaultMap(source, target);
                     return;
+                }
+                if (mappingRelation.UseDefaultMapper)
+                {
+                    DefaultMap(source, target);
                 }
                 mappingRelation.MapObj(this, source, target);
             }

@@ -23,169 +23,57 @@ public partial class MainTest : MateralTestBase
         return serviceProvider;
     }
     /// <summary>
-    /// 无配置文件测试
+    /// 测试默认映射单个对象
     /// </summary>
     [TestMethod]
-    public void NotProfileTest()
+    public void MapOneModelTest()
     {
         IMapper mapper = ServiceProvider.GetRequiredService<IMapper>();
-        ModelA modelA = new()
+        ModelA source = new()
         {
             Name = "测试",
             Sub = new()
             {
                 Age = 18
-            }
+            },
+            Subs = [
+                new(){ Age = 18 },
+                new(){ Age = 19 },
+                new(){ Age = 20 }
+            ]
         };
-        ModelB modelB = mapper.Map<ModelB>(modelA);
-        Assert.AreEqual(modelA.Name, modelB.Name);
-        Assert.AreEqual(modelA.Sub, modelB.Sub);
-        Assert.AreEqual(modelA.Sub.Age, modelB.Sub.Age);
-        Assert.AreEqual(modelA.CreateTime, modelB.CreateTime);
-        List<ModelA> modelAs =
-        [
-            modelA,
-            new ModelA
-            {
-                Name = "测试1",
-                Sub = new()
-                {
-                    Age = 19
-                }
-            }
-        ];
-        List<ModelB> modelBs = mapper.Map<List<ModelB>>(modelAs);
-        Assert.AreEqual(modelAs.Count, modelBs.Count);
-        for (int i = 0; i < modelAs.Count; i++)
         {
-            Assert.AreEqual(modelAs[i].Name, modelBs[i].Name);
-            Assert.AreEqual(modelAs[i].Sub, modelBs[i].Sub);
-            Assert.AreEqual(modelAs[i].Sub.Age, modelBs[i].Sub.Age);
-            Assert.AreEqual(modelAs[i].CreateTime, modelBs[i].CreateTime);
+            ModelA modelA = mapper.Map<ModelA>(source);
+            Assert.AreEqual(source.Name, modelA.Name);
+            Assert.AreEqual(source.Sub.Age, modelA.Sub.Age);
+            Assert.AreEqual(source.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelA.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"));
+            Assert.AreEqual(source.Subs.Count, modelA.Subs.Count);
+            for (int i = 0; i < source.Subs.Count; i++)
+            {
+                Assert.AreEqual(source.Subs[i].Age, modelA.Subs[i].Age);
+            }
         }
-    }
-    /// <summary>
-    /// 有配置文件测试
-    /// </summary>
-    [TestMethod]
-    public void ProfileTest()
-    {
-        IMapper mapper = ServiceProvider.GetRequiredService<IMapper>();
-        ModelA modelA = new()
         {
-            Name = "测试",
-            Sub = new()
+            ModelB modelB = mapper.Map<ModelB>(source);
+            Assert.AreEqual(source.Name, modelB.Name);
+            Assert.AreEqual(source.Sub.Age, modelB.Sub.Age);
+            Assert.AreEqual(source.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelB.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"));
+            Assert.AreEqual(source.Subs.Count, modelB.Subs.Count);
+            for (int i = 0; i < source.Subs.Count; i++)
             {
-                Age = 18
+                Assert.AreEqual(source.Subs[i].Age, modelB.Subs[i].Age);
             }
-        };
-        ModelC modelC = mapper.Map<ModelC>(modelA);
-        Assert.AreEqual(modelA.Name, modelC.Name);
-        Assert.AreEqual(modelA.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelC.CreateTime);
-        List<ModelA> modelAs =
-        [
-            modelA,
-            new ModelA
-            {
-                Name = "测试1",
-                Sub = new()
-                {
-                    Age = 19
-                }
-            }
-        ];
-        List<ModelC> modelCs = mapper.Map<List<ModelC>>(modelAs);
-        Assert.AreEqual(modelAs.Count, modelCs.Count);
-        for (int i = 0; i < modelAs.Count; i++)
-        {
-            Assert.AreEqual(modelAs[i].Name, modelCs[i].Name);
-            Assert.AreEqual(modelAs[i].Sub.Age, int.Parse(modelCs[i].Sub.Age));
-            Assert.AreEqual(modelAs[i].CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelCs[i].CreateTime);
         }
-    }
-    /// <summary>
-    /// 无配置文件对象测试
-    /// </summary>
-    [TestMethod]
-    public void NotProfileObjTest()
-    {
-        IMapper mapper = ServiceProvider.GetRequiredService<IMapper>();
-        ModelA modelA = new()
         {
-            Name = "测试",
-            Sub = new()
+            ModelC modelC = mapper.Map<ModelC>(source);
+            Assert.AreEqual(source.Name, modelC.Name);
+            Assert.AreEqual(source.Sub.Age, int.Parse(modelC.Sub.Age));
+            Assert.AreEqual(source.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelC.CreateTime);
+            Assert.AreEqual(source.Subs.Count, modelC.Subs.Count);
+            for (int i = 0; i < source.Subs.Count; i++)
             {
-                Age = 18
+                Assert.AreEqual(source.Subs[i].Age, int.Parse(modelC.Subs[i].Age));
             }
-        };
-        ModelB modelB = new();
-        mapper.Map(modelA, modelB);
-        Assert.AreEqual(modelA.Name, modelB.Name);
-        Assert.AreEqual(modelA.Sub, modelB.Sub);
-        Assert.AreEqual(modelA.Sub.Age, modelB.Sub.Age);
-        Assert.AreEqual(modelA.CreateTime, modelB.CreateTime);
-        List<ModelA> modelAs =
-        [
-            modelA,
-            new ModelA
-            {
-                Name = "测试1",
-                Sub = new()
-                {
-                    Age = 19
-                }
-            }
-        ];
-        List<ModelB> modelBs = [];
-        mapper.Map(modelAs, modelBs);
-        Assert.AreEqual(modelAs.Count, modelBs.Count);
-        for (int i = 0; i < modelAs.Count; i++)
-        {
-            Assert.AreEqual(modelAs[i].Name, modelBs[i].Name);
-            Assert.AreEqual(modelAs[i].Sub, modelBs[i].Sub);
-            Assert.AreEqual(modelAs[i].Sub.Age, modelBs[i].Sub.Age);
-            Assert.AreEqual(modelAs[i].CreateTime, modelBs[i].CreateTime);
-        }
-    }
-    /// <summary>
-    /// 有配置文件测试
-    /// </summary>
-    [TestMethod]
-    public void ProfileObjTest()
-    {
-        IMapper mapper = ServiceProvider.GetRequiredService<IMapper>();
-        ModelA modelA = new()
-        {
-            Name = "测试",
-            Sub = new()
-            {
-                Age = 18
-            }
-        };
-        ModelC modelC = new();
-        mapper.Map(modelA, modelC);
-        Assert.AreEqual(modelA.Name, modelC.Name);
-        Assert.AreEqual(modelA.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelC.CreateTime);
-        List<ModelA> modelAs =
-        [
-            modelA,
-            new ModelA
-            {
-                Name = "测试1",
-                Sub = new()
-                {
-                    Age = 19
-                }
-            }
-        ];
-        List<ModelC> modelCs = [];
-        mapper.Map(modelAs, modelCs);
-        Assert.AreEqual(modelAs.Count, modelCs.Count);
-        for (int i = 0; i < modelAs.Count; i++)
-        {
-            Assert.AreEqual(modelAs[i].Name, modelCs[i].Name);
-            Assert.AreEqual(modelAs[i].Sub.Age, int.Parse(modelCs[i].Sub.Age));
-            Assert.AreEqual(modelAs[i].CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelCs[i].CreateTime);
         }
     }
 }

@@ -8,20 +8,20 @@ namespace Materal.Utils.Test.AutoMapperTest
         {
             CreateMap<ModelA, ModelC>((mapper, m, n) =>
             {
-                m.CopyProperties(n);
-                mapper.Map(m.Sub, n.Sub);
+                n ??= new();
                 n.CreateTime = m.CreateTime.ToString("yyyy/MM/dd HH:mm:ss");
             }, (mapper, m, n) =>
             {
-                m.CopyProperties(n);
-                mapper.Map(m.Sub, n.Sub);
+                n ??= new();
                 n.CreateTime = DateTime.Parse(m.CreateTime);
             });
             CreateMap<SubModelA, SubModelC>((mapper, m, n) =>
             {
+                n ??= new();
                 n.Age = m.Age.ToString();
             }, (mapper, m, n) =>
             {
+                n ??= new();
                 n.Age = int.Parse(m.Age);
             });
         }
