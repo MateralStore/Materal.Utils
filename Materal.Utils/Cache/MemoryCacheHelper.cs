@@ -14,11 +14,11 @@ namespace Materal.Utils.Cache
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void SetBySliding(string key, object content, double hours) => SetBySliding(key, content, hours, DateTimeTypeEnum.Hour);
+        public void SetBySliding(string key, object content, double hours) => SetBySliding(key, content, hours, DateTimeUnitEnum.HourUnit);
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void SetBySliding(string key, object content, double timer, DateTimeTypeEnum dateTimeType)
+        public void SetBySliding(string key, object content, double timer, DateTimeUnitEnum dateTimeType)
         {
             double millisecond = DateTimeHelper.ToMilliseconds(timer, dateTimeType);
             SetBySliding(key, content, TimeSpan.FromMilliseconds(millisecond));
@@ -42,11 +42,11 @@ namespace Materal.Utils.Cache
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void SetByAbsolute(string key, object content, double hours) => SetByAbsolute(key, content, hours, DateTimeTypeEnum.Hour);
+        public void SetByAbsolute(string key, object content, double hours) => SetByAbsolute(key, content, hours, DateTimeUnitEnum.HourUnit);
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void SetByAbsolute(string key, object content, double timer, DateTimeTypeEnum dateTimeType)
+        public void SetByAbsolute(string key, object content, double timer, DateTimeUnitEnum dateTimeType)
         {
             double millisecond = DateTimeHelper.ToMilliseconds(timer, dateTimeType);
             SetByAbsolute(key, content, TimeSpan.FromMilliseconds(millisecond));

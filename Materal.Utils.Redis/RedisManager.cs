@@ -588,7 +588,7 @@ namespace Materal.Utils.Redis
         /// <returns></returns>
         public async Task<bool> SetExpiryAsync(string collectionName, int hours)
         {
-            return await SetExpiryAsync(collectionName, hours, DateTimeTypeEnum.Hour);
+            return await SetExpiryAsync(collectionName, hours, DateTimeUnitEnum.HourUnit);
         }
         /// <summary>
         /// 设置String值
@@ -597,7 +597,7 @@ namespace Materal.Utils.Redis
         /// <param name="timeValue">时间点</param>
         /// <param name="dateTimeType"></param>
         /// <returns></returns>
-        public async Task<bool> SetExpiryAsync(string collectionName, int timeValue, DateTimeTypeEnum dateTimeType)
+        public async Task<bool> SetExpiryAsync(string collectionName, int timeValue, DateTimeUnitEnum dateTimeType)
         {
             long milliseconds = Convert.ToInt64(DateTimeHelper.ToMilliseconds(timeValue, dateTimeType));
             TimeSpan expiry = new(milliseconds * 10000);
@@ -644,7 +644,7 @@ namespace Materal.Utils.Redis
         /// <param name="timeout">过期时间</param>
         /// <param name="timeoutType"></param>
         /// <returns></returns>
-        public async Task<RedisLock> GetBlockingLockAsync(string key, int timeout, DateTimeTypeEnum timeoutType)
+        public async Task<RedisLock> GetBlockingLockAsync(string key, int timeout, DateTimeUnitEnum timeoutType)
         {
             long milliseconds = Convert.ToInt64(DateTimeHelper.ToMilliseconds(timeout, timeoutType));
             TimeSpan expiry = new(milliseconds * 10000);
@@ -658,7 +658,7 @@ namespace Materal.Utils.Redis
         /// <returns></returns>
         public async Task<RedisLock> GetBlockingLockAsync(string key, int timeout)
         {
-            return await GetBlockingLockAsync(key, timeout, DateTimeTypeEnum.Millisecond);
+            return await GetBlockingLockAsync(key, timeout, DateTimeUnitEnum.MillisecondUnit);
         }
         #endregion
         #region 非阻塞锁
@@ -694,7 +694,7 @@ namespace Materal.Utils.Redis
         /// <param name="timeout">过期时间</param>
         /// <param name="timeoutType"></param>
         /// <returns></returns>
-        public async Task<RedisLock?> GetNonBlockingLockAsync(string key, int timeout, DateTimeTypeEnum timeoutType)
+        public async Task<RedisLock?> GetNonBlockingLockAsync(string key, int timeout, DateTimeUnitEnum timeoutType)
         {
             long milliseconds = Convert.ToInt64(DateTimeHelper.ToMilliseconds(timeout, timeoutType));
             TimeSpan expiry = new(milliseconds * 10000);
@@ -708,7 +708,7 @@ namespace Materal.Utils.Redis
         /// <returns></returns>
         public async Task<RedisLock?> GetNonBlockingLockAsync(string key, int timeout)
         {
-            return await GetNonBlockingLockAsync(key, timeout, DateTimeTypeEnum.Millisecond);
+            return await GetNonBlockingLockAsync(key, timeout, DateTimeUnitEnum.MillisecondUnit);
         }
         #endregion
         #region 私有方法

@@ -19,7 +19,7 @@
         /// <param name="content">要缓存的对象</param>
         /// <param name="timer">时间值</param>
         /// <param name="dateTimeType">时间类型</param>
-        void SetBySliding(string key, object content, double timer, DateTimeTypeEnum dateTimeType);
+        void SetBySliding(string key, object content, double timer, DateTimeUnitEnum dateTimeType);
         /// <summary>
         /// 设置缓存(只要有访问就会延时)
         /// </summary>
@@ -48,7 +48,7 @@
         /// <param name="content">要缓存的对象</param>
         /// <param name="timer">时间值</param>
         /// <param name="dateTimeType">时间类型</param>
-        void SetByAbsolute(string key, object content, double timer, DateTimeTypeEnum dateTimeType);
+        void SetByAbsolute(string key, object content, double timer, DateTimeUnitEnum dateTimeType);
         /// <summary>
         /// 设置缓存(绝对时间)
         /// </summary>
