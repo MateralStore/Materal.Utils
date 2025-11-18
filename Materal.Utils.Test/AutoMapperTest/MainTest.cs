@@ -47,7 +47,7 @@ public partial class MainTest : MateralTestBase
             Assert.AreEqual(source.Name, modelA.Name);
             Assert.AreEqual(source.Sub.Age, modelA.Sub.Age);
             Assert.AreEqual(source.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelA.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"));
-            Assert.AreEqual(source.Subs.Count, modelA.Subs.Count);
+            Assert.HasCount(source.Subs.Count, modelA.Subs);
             for (int i = 0; i < source.Subs.Count; i++)
             {
                 Assert.AreEqual(source.Subs[i].Age, modelA.Subs[i].Age);
@@ -58,7 +58,7 @@ public partial class MainTest : MateralTestBase
             Assert.AreEqual(source.Name, modelB.Name);
             Assert.AreEqual(source.Sub.Age, modelB.Sub.Age);
             Assert.AreEqual(source.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelB.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"));
-            Assert.AreEqual(source.Subs.Count, modelB.Subs.Count);
+            Assert.HasCount(source.Subs.Count, modelB.Subs);
             for (int i = 0; i < source.Subs.Count; i++)
             {
                 Assert.AreEqual(source.Subs[i].Age, modelB.Subs[i].Age);
@@ -69,7 +69,7 @@ public partial class MainTest : MateralTestBase
             Assert.AreEqual(source.Name, modelC.Name);
             Assert.AreEqual(source.Sub.Age, int.Parse(modelC.Sub.Age));
             Assert.AreEqual(source.CreateTime.ToString("yyyy/MM/dd HH:mm:ss"), modelC.CreateTime);
-            Assert.AreEqual(source.Subs.Count, modelC.Subs.Count);
+            Assert.HasCount(source.Subs.Count, modelC.Subs);
             for (int i = 0; i < source.Subs.Count; i++)
             {
                 Assert.AreEqual(source.Subs[i].Age, int.Parse(modelC.Subs[i].Age));
