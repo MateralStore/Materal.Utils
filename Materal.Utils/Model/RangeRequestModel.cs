@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Materal.Utils.Model
+﻿namespace Materal.Utils.Model
 {
     /// <summary>
     /// 范围请求模型
@@ -14,7 +12,7 @@ namespace Materal.Utils.Model
         /// <summary>
         /// 跳过数量
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int SkipInt => Skip > int.MaxValue ? int.MaxValue : (int)Skip;
         /// <summary>
         /// 获取数量
@@ -23,7 +21,7 @@ namespace Materal.Utils.Model
         /// <summary>
         /// 跳过数量
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int TakeInt => Take > int.MaxValue ? int.MaxValue : (int)Take;
         /// <summary>
         /// 构造方法

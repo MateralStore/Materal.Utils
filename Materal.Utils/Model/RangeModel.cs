@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Materal.Utils.Model
+﻿namespace Materal.Utils.Model
 {
     /// <summary>
     /// 范围模型
@@ -14,7 +12,7 @@ namespace Materal.Utils.Model
         /// <summary>
         /// 数据总数
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int DataCountInt => DataCount > int.MaxValue ? int.MaxValue : (int)DataCount;
         /// <summary>
         /// 构造方法

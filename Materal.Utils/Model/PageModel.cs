@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Materal.Utils.Model
+﻿namespace Materal.Utils.Model
 {
     /// <summary>
     /// 分页模型
@@ -14,7 +12,7 @@ namespace Materal.Utils.Model
         /// <summary>
         /// 总页数
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int PageCountInt => PageCount > int.MaxValue ? int.MaxValue : (int)PageCount;
         /// <summary>
         /// 开始序号
@@ -23,7 +21,7 @@ namespace Materal.Utils.Model
         /// <summary>
         /// 开始序号
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int StartIndexInt => StartIndex > int.MaxValue ? int.MaxValue : (int)StartIndex;
         /// <summary>
         /// 数据总数
@@ -32,7 +30,7 @@ namespace Materal.Utils.Model
         /// <summary>
         /// 数据总数
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int DataCountInt => DataCount > int.MaxValue ? int.MaxValue : (int)DataCount;
         /// <summary>
         /// 构造方法

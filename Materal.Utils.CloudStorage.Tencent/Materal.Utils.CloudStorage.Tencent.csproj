@@ -6,6 +6,7 @@
 		<Description>Materal腾讯云存储服务工具包</Description>
 	</PropertyGroup>
 	<ItemGroup>
+	  <PackageReference Include="Newtonsoft.Json" />
 	  <PackageReference Include="Tencent.QCloud.Cos.Sdk" />
 	  <PackageReference Include="Tencent.QCloud.Cos.Sts.Sdk" />
 	</ItemGroup>

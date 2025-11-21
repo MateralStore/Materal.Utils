@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Materal.Utils.Model
+﻿namespace Materal.Utils.Model
 {
     /// <summary>
     /// 分页请求模型
@@ -27,7 +25,7 @@ namespace Materal.Utils.Model
         /// <summary>
         /// 页面位序
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int PageIndexInt => PageIndex > int.MaxValue ? int.MaxValue : (int)PageIndex;
         private long pageSize = 10;
         /// <summary>
@@ -41,17 +39,17 @@ namespace Materal.Utils.Model
         /// <summary>
         /// 显示数量
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int PageSizeInt => PageSize > int.MaxValue ? int.MaxValue : (int)PageSize;
         /// <summary>
         /// 分页跳过数量
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public long PageSkip => (PageIndex - PageStartNumber) * PageSize;
         /// <summary>
         /// 分页跳过数量
         /// </summary>
-        [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public int PageSkipInt => PageSkip > int.MaxValue ? int.MaxValue : (int)PageSkip;
         private long? _skip;
         /// <summary>
