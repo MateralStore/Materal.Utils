@@ -19,6 +19,7 @@
 	  <ProjectReference Include="..\Materal.Utils.BarCode\Materal.Utils.BarCode.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.CloudStorage.Tencent\Materal.Utils.CloudStorage.Tencent.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.Consul\Materal.Utils.Consul.csproj" />
+	  <ProjectReference Include="..\Materal.Utils.Email\Materal.Utils.Email.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.Excel\Materal.Utils.Excel.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.Image\Materal.Utils.Image.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.MongoDB\Materal.Utils.MongoDB.csproj" />
