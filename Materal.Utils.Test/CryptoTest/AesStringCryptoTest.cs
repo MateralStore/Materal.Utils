@@ -362,7 +362,7 @@ public partial class AesStringCryptoTest
 
         // 篡改加密数据（修改Base64字符串的一个字符）
         byte[] encryptedBytes = Convert.FromBase64String(encrypted);
-        encryptedBytes[encryptedBytes.Length - 1] ^= 0x01; // 翻转最后一个字节的一个位
+        encryptedBytes[^1] ^= 0x01; // 翻转最后一个字节的一个位
         string tamperedEncrypted = Convert.ToBase64String(encryptedBytes);
 
         // 解密被篡改的数据应该抛出异常
