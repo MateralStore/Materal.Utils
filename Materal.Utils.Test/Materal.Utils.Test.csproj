@@ -15,6 +15,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Materal.Test.Base\Materal.Test.Base\Materal.Test.Base.csproj" />
+	  <ProjectReference Include="..\Materal.Utils.Crypto\Materal.Utils.Crypto.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.AutoMapper\Materal.Utils.AutoMapper.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.BarCode\Materal.Utils.BarCode.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.CloudStorage.Tencent\Materal.Utils.CloudStorage.Tencent.csproj" />
