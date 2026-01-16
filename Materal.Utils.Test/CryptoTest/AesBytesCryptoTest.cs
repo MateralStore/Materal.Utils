@@ -7,7 +7,7 @@ namespace Materal.Utils.Test.CryptoTest;
 /// 测试 AES-CBC 和 AES-GCM 两种模式的加密解密功能
 /// </summary>
 [TestClass]
-public partial class AesCryptoTest
+public partial class AesBytesCryptoTest
 {
     /// <summary>
     /// 测试内容

@@ -3,52 +3,20 @@
 namespace Materal.Utils.Crypto;
 
 /// <summary>
-/// Aes加解密核心
+/// Aes加解密流操作扩展
 /// </summary>
 public static partial class AesCrypto
 {
-    #region Aes-CBC 加密（非认证加密）
+    #region Aes-CBC 流加解密
     /// <summary>
-    /// 生成Aes-CBC密钥和IV
+    /// Aes-CBC加密流（PKCS7填充）
     /// </summary>
-    /// <returns>Base64编码的(密钥, IV)元组</returns>
-    /// <remarks>
-    /// 密钥长度：256位（32字节）
-    /// IV长度：128位（16字节）
-    /// 注意：每次调用都会生成新的随机密钥和IV
-    /// </remarks>
-    public static (byte[] key, byte[] iv) GenerateAesCBCKey()
-    {
-        using Aes aes = Aes.Create();
-        aes.GenerateKey();
-        aes.GenerateIV();
-        return (aes.Key, aes.IV);
-    }
-
-    /// <summary>
-    /// 生成Aes-CBC密钥和IV
-    /// </summary>
-    /// <returns>Base64编码的(密钥, IV)元组</returns>
-    /// <remarks>
-    /// 密钥长度：256位（32字节）
-    /// IV长度：128位（16字节）
-    /// 注意：每次调用都会生成新的随机密钥和IV
-    /// </remarks>
-    public static (string key, string iv) GenerateAesCBCStringKey()
-    {
-        (byte[] keyBytes, byte[] ivBytes) = GenerateAesCBCKey();
-        string key = Convert.ToBase64String(keyBytes);
-        string iv = Convert.ToBase64String(ivBytes);
-        return (key, iv);
-    }
-
-    /// <summary>
-    /// Aes-CBC加密（PKCS7填充）
-    /// </summary>
-    /// <param name="content">要加密的内容（UTF-8编码）</param>
+    /// <param name="inputStream">要加密的输入流</param>
+    /// <param name="outputStream">加密后的输出流</param>
     /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
     /// <param name="iv">Base64编码的初始化向量（16字节）</param>
-    /// <returns>Base64编码的加密数据</returns>
+    /// <param name="bufferSize">缓冲区大小，默认为8192字节</param>
+    /// <returns>加密的字节总数</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">加密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
@@ -56,488 +24,573 @@ public static partial class AesCrypto
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, string key, string iv)
+    public static long AesCBCEncryptStream(Stream inputStream, Stream outputStream, string key, string iv, int bufferSize = 8192)
     {
+        if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
+        if (iv is null) throw new ArgumentException("初始化向量不能为空", nameof(iv));
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] ivBytes = Convert.FromBase64String(iv);
-        return AesCBCEncrypt(content, keyBytes, ivBytes);
+        return AesCBCEncryptStream(inputStream, outputStream, keyBytes, ivBytes, bufferSize);
     }
 
     /// <summary>
-    /// Aes-CBC加密（PKCS7填充）
+    /// Aes-CBC加密流（PKCS7填充）
     /// </summary>
-    /// <param name="content">要加密的内容（UTF-8编码）</param>
-    /// <param name="keyBytes">Base64编码的密钥（16/24/32字节）</param>
-    /// <param name="ivBytes">Base64编码的初始化向量（16字节）</param>
-    /// <returns>Base64编码的加密数据</returns>
+    /// <param name="inputStream">要加密的输入流</param>
+    /// <param name="outputStream">加密后的输出流</param>
+    /// <param name="keyBytes">密钥字节数组（16/24/32字节）</param>
+    /// <param name="ivBytes">初始化向量字节数组（16字节）</param>
+    /// <param name="bufferSize">缓冲区大小，默认为8192字节</param>
+    /// <returns>加密的字节总数</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">加密失败时抛出</exception>
-    /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <remarks>
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, byte[] keyBytes, byte[] ivBytes)
+    public static long AesCBCEncryptStream(Stream inputStream, Stream outputStream, byte[] keyBytes, byte[] ivBytes, int bufferSize = 8192)
     {
-        if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
+        if (inputStream is null) throw new ArgumentNullException(nameof(inputStream));
+        if (outputStream is null) throw new ArgumentNullException(nameof(outputStream));
+        if (!inputStream.CanRead) throw new ArgumentException("输入流必须可读", nameof(inputStream));
+        if (!outputStream.CanWrite) throw new ArgumentException("输出流必须可写", nameof(outputStream));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (ivBytes is null || ivBytes.Length == 0) throw new ArgumentException("初始化向量不能为空", nameof(ivBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）", nameof(keyBytes));
         if (ivBytes.Length != 16) throw new ArgumentException("IV长度必须为16字节", nameof(ivBytes));
+        if (bufferSize <= 0) throw new ArgumentException("缓冲区大小必须大于0", nameof(bufferSize));
+
         using Aes aes = Aes.Create();
         aes.Key = keyBytes;
         aes.IV = ivBytes;
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.PKCS7;
         using ICryptoTransform encryptor = aes.CreateEncryptor();
-        using MemoryStream ms = new();
-        using CryptoStream cs = new(ms, encryptor, CryptoStreamMode.Write);
-        cs.Write(content, 0, content.Length);
-        cs.FlushFinalBlock();
-        return ms.ToArray();
+#if NET
+        using CryptoStream cryptoStream = new(outputStream, encryptor, CryptoStreamMode.Write, leaveOpen: true);
+#else
+        using CryptoStream cryptoStream = new(outputStream, encryptor, CryptoStreamMode.Write);
+#endif
+        byte[] buffer = new byte[bufferSize];
+        long totalBytes = 0;
+        int bytesRead;
+
+        while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            cryptoStream.Write(buffer, 0, bytesRead);
+            totalBytes += bytesRead;
+        }
+
+        cryptoStream.FlushFinalBlock();
+        return totalBytes;
     }
 
     /// <summary>
-    /// Aes-CBC解密（PKCS7填充）
+    /// Aes-CBC解密流（PKCS7填充）
     /// </summary>
-    /// <param name="content">要解密的Base64编码加密数据</param>
+    /// <param name="inputStream">要解密的输入流</param>
+    /// <param name="outputStream">解密后的输出流</param>
     /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
     /// <param name="iv">Base64编码的初始化向量（16字节）</param>
-    /// <returns>解密后的原始内容（UTF-8编码）</returns>
+    /// <param name="bufferSize">缓冲区大小，默认为8192字节</param>
+    /// <returns>解密的字节总数</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
-    public static byte[] AesCBCDecrypt(byte[] content, string key, string iv)
+    public static long AesCBCDecryptStream(Stream inputStream, Stream outputStream, string key, string iv, int bufferSize = 8192)
     {
+        if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
+        if (iv is null) throw new ArgumentException("初始化向量不能为空", nameof(iv));
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] ivBytes = Convert.FromBase64String(iv);
-        return AesCBCDecrypt(content, keyBytes, ivBytes);
+        return AesCBCDecryptStream(inputStream, outputStream, keyBytes, ivBytes, bufferSize);
     }
 
     /// <summary>
-    /// Aes-CBC解密（PKCS7填充）
+    /// Aes-CBC解密流（PKCS7填充）
     /// </summary>
-    /// <param name="content">要解密的Base64编码加密数据</param>
-    /// <param name="keyBytes">Base64编码的密钥（16/24/32字节）</param>
-    /// <param name="ivBytes">Base64编码的初始化向量（16字节）</param>
-    /// <returns>解密后的原始内容（UTF-8编码）</returns>
+    /// <param name="inputStream">要解密的输入流</param>
+    /// <param name="outputStream">解密后的输出流</param>
+    /// <param name="keyBytes">密钥字节数组（16/24/32字节）</param>
+    /// <param name="ivBytes">初始化向量字节数组（16字节）</param>
+    /// <param name="bufferSize">缓冲区大小，默认为8192字节</param>
+    /// <returns>解密的字节总数</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
-    /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
-    public static byte[] AesCBCDecrypt(byte[] content, byte[] keyBytes, byte[] ivBytes)
+    public static long AesCBCDecryptStream(Stream inputStream, Stream outputStream, byte[] keyBytes, byte[] ivBytes, int bufferSize = 8192)
     {
-        if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
+        if (inputStream is null) throw new ArgumentNullException(nameof(inputStream));
+        if (outputStream is null) throw new ArgumentNullException(nameof(outputStream));
+        if (!inputStream.CanRead) throw new ArgumentException("输入流必须可读", nameof(inputStream));
+        if (!outputStream.CanWrite) throw new ArgumentException("输出流必须可写", nameof(outputStream));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (ivBytes is null || ivBytes.Length == 0) throw new ArgumentException("初始化向量不能为空", nameof(ivBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）", nameof(keyBytes));
         if (ivBytes.Length != 16) throw new ArgumentException("IV长度必须为16字节", nameof(ivBytes));
+        if (bufferSize <= 0) throw new ArgumentException("缓冲区大小必须大于0", nameof(bufferSize));
+
         using Aes aes = Aes.Create();
         aes.Key = keyBytes;
         aes.IV = ivBytes;
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.PKCS7;
         using ICryptoTransform decryptor = aes.CreateDecryptor();
-        using MemoryStream ms = new(content);
-        using CryptoStream cs = new(ms, decryptor, CryptoStreamMode.Read);
-        using MemoryStream decryptedMs = new();
-        cs.CopyTo(decryptedMs);
-        return decryptedMs.ToArray();
+        using MemoryStream decryptedStream = new();
+#if NET
+        using CryptoStream cryptoStream = new(decryptedStream, decryptor, CryptoStreamMode.Write, leaveOpen: true);
+#else
+        using CryptoStream cryptoStream = new(decryptedStream, decryptor, CryptoStreamMode.Write);
+#endif
+        byte[] buffer = new byte[bufferSize];
+        long totalBytes = 0;
+        int bytesRead;
+
+        while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            cryptoStream.Write(buffer, 0, bytesRead);
+            totalBytes += bytesRead;
+        }
+        cryptoStream.FlushFinalBlock();
+
+        // 获取解密后的数据并移除PKCS7填充
+        byte[] decryptedBytes = decryptedStream.ToArray();
+        if (decryptedBytes.Length > 0)
+        {
+            // PKCS7填充：最后一个字节的值表示填充的字节数
+            int paddingLength = decryptedBytes[decryptedBytes.Length - 1];
+            if (paddingLength > 0 && paddingLength <= 16 && paddingLength <= decryptedBytes.Length) // AES块大小为16字节，且填充长度不能超过数据长度
+            {
+                // 验证填充是否正确
+                bool validPadding = true;
+                for (int i = decryptedBytes.Length - paddingLength; i < decryptedBytes.Length; i++)
+                {
+                    if (decryptedBytes[i] != paddingLength)
+                    {
+                        validPadding = false;
+                        break;
+                    }
+                }
+                
+                if (validPadding)
+                {
+                    // 移除填充字节
+                    int dataLength = decryptedBytes.Length - paddingLength;
+                    outputStream.Write(decryptedBytes, 0, dataLength);
+                    return dataLength;
+                }
+            }
+        }
+        
+        // 如果没有填充或填充无效，写入全部数据
+        outputStream.Write(decryptedBytes, 0, decryptedBytes.Length);
+        return decryptedBytes.Length;
     }
 
     /// <summary>
-    /// Aes-CBC加密（自动生成密钥和IV）
+    /// 创建Aes-CBC加密流（使用随机IV）
     /// </summary>
-    /// <param name="content">要加密的内容（UTF-8编码）</param>
-    /// <param name="key">输出的Base64编码密钥</param>
-    /// <param name="iv">输出的Base64编码IV</param>
-    /// <returns>Base64编码的加密数据</returns>
-    /// <remarks>
-    /// 此方法会生成新的随机密钥和IV，适用于需要生成密钥的场景。
-    /// 请妥善保存输出的密钥和IV，解密时需要使用相同的密钥和IV。
-    /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, out string key, out string iv)
-    {
-        (key, iv) = GenerateAesCBCStringKey();
-        return AesCBCEncrypt(content, key, iv);
-    }
-
-    /// <summary>
-    /// Aes-CBC加密（使用随机IV）
-    /// </summary>
-    /// <param name="content">要加密的内容（UTF-8编码）</param>
+    /// <param name="outputStream">输出流</param>
     /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
-    /// <returns>Base64编码的加密数据（IV前置）</returns>
+    /// <returns>加密流和IV的元组</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">加密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <remarks>
-    /// 返回格式：Base64(IV + 加密数据)
-    /// IV（16字节）会被前置到加密数据前，解密时自动提取。
+    /// IV会自动写入到输出流的开始位置。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, string key)
+    public static (CryptoStream cryptoStream, byte[] iv) CreateAesCBCEncryptStream(Stream outputStream, string key)
     {
+        if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesCBCEncrypt(content, keyBytes);
+        return CreateAesCBCEncryptStream(outputStream, keyBytes);
     }
 
     /// <summary>
-    /// Aes-CBC加密（使用随机IV）
+    /// 创建Aes-CBC加密流（使用随机IV）
     /// </summary>
-    /// <param name="content">要加密的内容（UTF-8编码）</param>
-    /// <param name="keyBytes">Base64编码的密钥（16/24/32字节）</param>
-    /// <returns>Base64编码的加密数据（IV前置）</returns>
+    /// <param name="outputStream">输出流</param>
+    /// <param name="keyBytes">密钥字节数组（16/24/32字节）</param>
+    /// <returns>加密流和IV的元组</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">加密失败时抛出</exception>
-    /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <remarks>
-    /// 返回格式：Base64(IV + 加密数据)
-    /// IV（16字节）会被前置到加密数据前，解密时自动提取。
+    /// IV会自动写入到输出流的开始位置。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, byte[] keyBytes)
+    public static (CryptoStream cryptoStream, byte[] iv) CreateAesCBCEncryptStream(Stream outputStream, byte[] keyBytes)
     {
-        if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
+        if (outputStream is null) throw new ArgumentNullException(nameof(outputStream));
+        if (!outputStream.CanWrite) throw new ArgumentException("输出流必须可写", nameof(outputStream));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）", nameof(keyBytes));
+
         using Aes aes = Aes.Create();
         aes.Key = keyBytes;
         aes.GenerateIV();
-        using ICryptoTransform encryptor = aes.CreateEncryptor();
-        using MemoryStream ms = new();
-        using CryptoStream cs = new(ms, encryptor, CryptoStreamMode.Write);
-        cs.Write(content, 0, content.Length);
-        cs.FlushFinalBlock();
-        byte[] encryptedBytes = ms.ToArray();
-        byte[] resultBytes = new byte[aes.IV.Length + encryptedBytes.Length];
-        Buffer.BlockCopy(aes.IV, 0, resultBytes, 0, aes.IV.Length);
-        Buffer.BlockCopy(encryptedBytes, 0, resultBytes, aes.IV.Length, encryptedBytes.Length);
-        return resultBytes;
+        byte[] iv = aes.IV;
+
+        // 将IV写入输出流
+        outputStream.Write(iv, 0, iv.Length);
+
+        // 创建加密器
+        ICryptoTransform encryptor = aes.CreateEncryptor();
+#if NET
+        CryptoStream cryptoStream = new(outputStream, encryptor, CryptoStreamMode.Write, leaveOpen: true);
+#else
+        CryptoStream cryptoStream = new(outputStream, encryptor, CryptoStreamMode.Write);
+#endif
+
+        return (cryptoStream, iv);
     }
 
     /// <summary>
-    /// Aes-CBC解密（自动提取IV）
+    /// 创建Aes-CBC解密流（自动提取IV）
     /// </summary>
-    /// <param name="content">Base64编码的加密数据（IV前置格式）</param>
+    /// <param name="inputStream">输入流（IV前置格式）</param>
     /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
-    /// <returns>解密后的原始内容（UTF-8编码）</returns>
+    /// <returns>解密流</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">解密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <remarks>
-    /// 输入格式：Base64(IV + 加密数据)
+    /// 输入格式：IV + 加密数据
     /// 会自动从前16字节提取IV进行解密。
-    /// 与 AesCBCEncrypt(content, key) 方法配对使用。
+    /// 与 CreateAesCBCEncryptStream 方法配对使用。
     /// </remarks>
-    public static byte[] AesCBCDecrypt(byte[] content, string key)
+    public static CryptoStream CreateAesCBCDecryptStream(Stream inputStream, string key)
     {
+        if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesCBCDecrypt(content, keyBytes);
+        return CreateAesCBCDecryptStream(inputStream, keyBytes);
     }
 
     /// <summary>
-    /// Aes-CBC解密（自动提取IV）
+    /// 创建Aes-CBC解密流（自动提取IV）
     /// </summary>
-    /// <param name="content">Base64编码的加密数据（IV前置格式）</param>
-    /// <param name="keyBytes">Base64编码的密钥（16/24/32字节）</param>
-    /// <returns>解密后的原始内容（UTF-8编码）</returns>
+    /// <param name="inputStream">输入流（IV前置格式）</param>
+    /// <param name="keyBytes">密钥字节数组（16/24/32字节）</param>
+    /// <returns>解密流</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">解密失败时抛出</exception>
-    /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <remarks>
-    /// 输入格式：Base64(IV + 加密数据)
+    /// 输入格式：IV + 加密数据
     /// 会自动从前16字节提取IV进行解密。
-    /// 与 AesCBCEncrypt(content, key) 方法配对使用。
+    /// 与 CreateAesCBCEncryptStream 方法配对使用。
     /// </remarks>
-    public static byte[] AesCBCDecrypt(byte[] content, byte[] keyBytes)
+    public static CryptoStream CreateAesCBCDecryptStream(Stream inputStream, byte[] keyBytes)
     {
-        if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
+        if (inputStream is null) throw new ArgumentNullException(nameof(inputStream));
+        if (!inputStream.CanRead) throw new ArgumentException("输入流必须可读", nameof(inputStream));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）", nameof(keyBytes));
+
+        // 读取IV
+        byte[] iv = new byte[16];
+        int bytesRead = inputStream.Read(iv, 0, iv.Length);
+        if (bytesRead != 16) throw new ArgumentException("无法读取完整的IV", nameof(inputStream));
+
+        // 创建解密器
         using Aes aes = Aes.Create();
-        int ivLength = aes.BlockSize / 8;
-        if (content.Length < ivLength) throw new ArgumentException("数据长度不足，无法提取IV");
-        byte[] ivBytes = new byte[ivLength];
-        byte[] encryptedBytes = new byte[content.Length - ivLength];
-        Buffer.BlockCopy(content, 0, ivBytes, 0, ivLength);
-        Buffer.BlockCopy(content, ivLength, encryptedBytes, 0, encryptedBytes.Length);
         aes.Key = keyBytes;
-        aes.IV = ivBytes;
+        aes.IV = iv;
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.PKCS7;
-        using ICryptoTransform decryptor = aes.CreateDecryptor();
-        using MemoryStream ms = new(encryptedBytes);
-        using CryptoStream cs = new(ms, decryptor, CryptoStreamMode.Read);
-        using MemoryStream decryptedMs = new();
-        cs.CopyTo(decryptedMs);
-        return decryptedMs.ToArray();
+        ICryptoTransform decryptor = aes.CreateDecryptor();
+        
+        // 创建一个包装流，跳过IV部分
+        Stream decryptedStream = new SkipIVStream(inputStream, iv.Length);
+        
+#if NET
+        return new CryptoStream(decryptedStream, decryptor, CryptoStreamMode.Read, leaveOpen: true);
+#else
+        return new CryptoStream(decryptedStream, decryptor, CryptoStreamMode.Read);
+#endif
     }
+
+    /// <summary>
+    /// 跳过IV的包装流
+    /// </summary>
+    private class SkipIVStream : Stream
+    {
+        private readonly Stream _innerStream;
+        private readonly long _skipBytes;
+        private long _position;
+
+        public SkipIVStream(Stream innerStream, long skipBytes)
+        {
+            _innerStream = innerStream;
+            _skipBytes = skipBytes;
+            _position = 0;
+        }
+
+        public override bool CanRead => _innerStream.CanRead;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => _innerStream.Length - _skipBytes;
+        public override long Position
+        {
+            get => _position;
+            set => throw new NotSupportedException();
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            int bytesRead = _innerStream.Read(buffer, offset, count);
+            _position += bytesRead;
+            return bytesRead;
+        }
+
+        public override void Flush() => _innerStream.Flush();
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
     #endregion
-
     #region Aes-GCM 认证加密（AEAD）
-    // Aes-GCM 认证加密
-    // GCM模式提供认证加密（AEAD），能同时保证机密性和完整性。
-    // 相比CBC模式更安全，性能更好，推荐在新项目中使用。
-    // 注意：仅在 .NET Core 3.0+ 和 .NET 5+ 中支持。
 #if NET
     /// <summary>
-    /// GCM认证标签大小（128位）
+    /// Aes-GCM加密流（推荐用于高安全性场景）
     /// </summary>
-    public const int AesGcmTagSize = 16;
-
-    /// <summary>
-    /// GCM推荐nonce大小（96位）
-    /// </summary>
-    public const int AesGcmNonceSize = 12;
-
-    /// <summary>
-    /// 生成Aes-GCM密钥
-    /// </summary>
-    /// <param name="keySize">密钥大小（128、192或256位）</param>
-    /// <returns>Base64编码的密钥</returns>
-    /// <exception cref="ArgumentException">密钥大小无效时抛出</exception>
-    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
-    /// <remarks>
-    /// 推荐使用256位密钥以获得更高的安全性。
-    /// 生成的密钥是随机的，请妥善保存。
-    /// </remarks>
-    public static byte[] GenerateAesGCMKey(int keySize = 256)
-    {
-        if (keySize != 128 && keySize != 192 && keySize != 256) throw new ArgumentException("密钥大小必须是128、192或256位");
-        using Aes aes = Aes.Create();
-        aes.KeySize = keySize;
-        aes.GenerateKey();
-        return aes.Key;
-    }
-
-    /// <summary>
-    /// 生成Aes-GCM密钥
-    /// </summary>
-    /// <param name="keySize">密钥大小（128、192或256位）</param>
-    /// <returns>Base64编码的密钥</returns>
-    /// <exception cref="ArgumentException">密钥大小无效时抛出</exception>
-    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
-    /// <remarks>
-    /// 推荐使用256位密钥以获得更高的安全性。
-    /// 生成的密钥是随机的，请妥善保存。
-    /// </remarks>
-    public static string GenerateAesGCMStringKey(int keySize = 256)
-    {
-        byte[] keyBytes = GenerateAesGCMKey(keySize);
-        string key = Convert.ToBase64String(keyBytes);
-        return key;
-    }
-
-    /// <summary>
-    /// Aes-GCM加密（推荐用于高安全性场景）
-    /// </summary>
-    /// <param name="content">要加密的内容（UTF-8编码）</param>
+    /// <param name="inputStream">要加密的输入流</param>
+    /// <param name="outputStream">加密后的输出流</param>
     /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
-    /// <returns>Base64编码的加密数据（nonce + tag + ciphertext）</returns>
+    /// <param name="bufferSize">缓冲区大小，默认为8192字节</param>
+    /// <returns>加密的字节总数</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">加密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
     /// <remarks>
-    /// 返回格式：Base64(nonce + tag + ciphertext)
+    /// 返回格式：nonce + tag + ciphertext
     /// - nonce: 12字节（随机数，每次加密必须唯一）
     /// - tag: 16字节（认证标签，验证数据完整性）
     /// - ciphertext: 加密后的数据
+    /// 注意：由于GCM不支持真正的流式加密，此方法会将整个流读入内存。
+    /// 对于大文件，建议使用分块处理或CBC模式。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static byte[] AesGCMEncrypt(byte[] content, string key)
+    public static long AesGCMEncryptStream(Stream inputStream, Stream outputStream, string key, int bufferSize = 8192)
     {
+        if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesGCMEncrypt(content, keyBytes);
+        return AesGCMEncryptStream(inputStream, outputStream, keyBytes, bufferSize);
     }
 
     /// <summary>
-    /// Aes-GCM加密（自动生成密钥和nonce）
+    /// Aes-GCM加密流（推荐用于高安全性场景）
     /// </summary>
-    /// <param name="content">要加密的内容（UTF-8编码）</param>
-    /// <param name="key">输出的Base64编码密钥</param>
-    /// <param name="nonce">输出的Base64编码nonce</param>
-    /// <returns>Base64编码的加密数据（tag + ciphertext）</returns>
+    /// <param name="inputStream">要加密的输入流</param>
+    /// <param name="outputStream">加密后的输出流</param>
+    /// <param name="keyBytes">密钥字节数组（16/24/32字节）</param>
+    /// <param name="bufferSize">缓冲区大小，默认为8192字节</param>
+    /// <returns>加密的字节总数</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">加密失败时抛出</exception>
     /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
     /// <remarks>
-    /// 此方法会生成新的随机密钥和nonce，适用于需要生成密钥的场景。
-    /// 返回格式：Base64(tag + ciphertext)
-    /// - tag: 16字节（认证标签，验证数据完整性）
-    /// - ciphertext: 加密后的数据
-    /// nonce通过out参数单独返回，请妥善保存输出的密钥和nonce，解密时需要使用相同的密钥和nonce。
-    /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
-    /// </remarks>
-    public static byte[] AesGCMEncrypt(byte[] content, out string key, out string nonce)
-    {
-        if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
-        key = GenerateAesGCMStringKey();
-        byte[] keyBytes = Convert.FromBase64String(key);
-        byte[] nonceBytes = new byte[AesGcmNonceSize];
-        RandomNumberGenerator.Fill(nonceBytes);
-        nonce = Convert.ToBase64String(nonceBytes);
-        (byte[] tag, byte[] ciphertext) = AesGCMEncryptCore(content, keyBytes, nonceBytes);
-        byte[] result = new byte[tag.Length + ciphertext.Length];
-        Buffer.BlockCopy(tag, 0, result, 0, tag.Length);
-        Buffer.BlockCopy(ciphertext, 0, result, tag.Length, ciphertext.Length);
-        return result;
-    }
-
-    /// <summary>
-    /// Aes-GCM加密（推荐用于高安全性场景）
-    /// </summary>
-    /// <param name="content">要加密的内容（UTF-8编码）</param>
-    /// <param name="keyBytes">Base64编码的密钥（16/24/32字节）</param>
-    /// <returns>Base64编码的加密数据（nonce + tag + ciphertext）</returns>
-    /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">加密失败时抛出</exception>
-    /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
-    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
-    /// <remarks>
-    /// 返回格式：Base64(nonce + tag + ciphertext)
+    /// 返回格式：nonce + tag + ciphertext
     /// - nonce: 12字节（随机数，每次加密必须唯一）
     /// - tag: 16字节（认证标签，验证数据完整性）
     /// - ciphertext: 加密后的数据
+    /// 注意：由于GCM不支持真正的流式加密，此方法会将整个流读入内存。
+    /// 对于大文件，建议使用分块处理或CBC模式。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static byte[] AesGCMEncrypt(byte[] content, byte[] keyBytes)
+    public static long AesGCMEncryptStream(Stream inputStream, Stream outputStream, byte[] keyBytes, int bufferSize = 8192)
     {
-        if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
+        if (inputStream is null) throw new ArgumentNullException(nameof(inputStream));
+        if (outputStream is null) throw new ArgumentNullException(nameof(outputStream));
+        if (!inputStream.CanRead) throw new ArgumentException("输入流必须可读", nameof(inputStream));
+        if (!outputStream.CanWrite) throw new ArgumentException("输出流必须可写", nameof(outputStream));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）");
+        if (bufferSize <= 0) throw new ArgumentException("缓冲区大小必须大于0", nameof(bufferSize));
+
+        // 读取整个流到内存
+        using MemoryStream ms = new();
+        inputStream.CopyTo(ms, bufferSize);
+        byte[] contentBytes = ms.ToArray();
+
+        // 处理空内容
+        if (contentBytes.Length == 0)
+        {
+            return 0;
+        }
+
+        // 使用GCM加密
+        byte[] encryptedBytes = AesGCMEncrypt(contentBytes, keyBytes);
+
+        // 写入输出流
+        outputStream.Write(encryptedBytes, 0, encryptedBytes.Length);
+
+        return contentBytes.Length;
+    }
+
+    /// <summary>
+    /// Aes-GCM解密流
+    /// </summary>
+    /// <param name="inputStream">要解密的输入流</param>
+    /// <param name="outputStream">解密后的输出流</param>
+    /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
+    /// <param name="bufferSize">缓冲区大小，默认为8192字节</param>
+    /// <returns>解密的字节总数</returns>
+    /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
+    /// <exception cref="CryptographicException">解密失败或认证失败时抛出</exception>
+    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
+    /// <remarks>
+    /// 输入格式：nonce + tag + ciphertext
+    /// 注意：由于GCM不支持真正的流式解密，此方法会将整个流读入内存。
+    /// 对于大文件，建议使用分块处理或CBC模式。
+    /// </remarks>
+    public static long AesGCMDecryptStream(Stream inputStream, Stream outputStream, string key, int bufferSize = 8192)
+    {
+        if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
+        byte[] keyBytes = Convert.FromBase64String(key);
+        return AesGCMDecryptStream(inputStream, outputStream, keyBytes, bufferSize);
+    }
+
+    /// <summary>
+    /// Aes-GCM解密流
+    /// </summary>
+    /// <param name="inputStream">要解密的输入流</param>
+    /// <param name="outputStream">解密后的输出流</param>
+    /// <param name="keyBytes">密钥字节数组（16/24/32字节）</param>
+    /// <param name="bufferSize">缓冲区大小，默认为8192字节</param>
+    /// <returns>解密的字节总数</returns>
+    /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
+    /// <exception cref="CryptographicException">解密失败或认证失败时抛出</exception>
+    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
+    /// <remarks>
+    /// 输入格式：nonce + tag + ciphertext
+    /// 注意：由于GCM不支持真正的流式解密，此方法会将整个流读入内存。
+    /// 对于大文件，建议使用分块处理或CBC模式。
+    /// </remarks>
+    public static long AesGCMDecryptStream(Stream inputStream, Stream outputStream, byte[] keyBytes, int bufferSize = 8192)
+    {
+        if (inputStream is null) throw new ArgumentNullException(nameof(inputStream));
+        if (outputStream is null) throw new ArgumentNullException(nameof(outputStream));
+        if (!inputStream.CanRead) throw new ArgumentException("输入流必须可读", nameof(inputStream));
+        if (!outputStream.CanWrite) throw new ArgumentException("输出流必须可写", nameof(outputStream));
+        if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
+        if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）");
+        if (bufferSize <= 0) throw new ArgumentException("缓冲区大小必须大于0", nameof(bufferSize));
+
+        // 读取整个流到内存
+        using MemoryStream ms = new();
+        inputStream.CopyTo(ms, bufferSize);
+        byte[] contentBytes = ms.ToArray();
+
+        // 处理空内容
+        if (contentBytes.Length == 0)
+        {
+            return 0;
+        }
+
+        // 使用GCM解密
+        byte[] decryptedBytes = AesGCMDecrypt(contentBytes, keyBytes);
+
+        // 写入输出流
+        outputStream.Write(decryptedBytes, 0, decryptedBytes.Length);
+
+        return decryptedBytes.Length;
+    }
+
+    /// <summary>
+    /// 创建Aes-GCM加密流（使用随机nonce）
+    /// </summary>
+    /// <param name="outputStream">输出流</param>
+    /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
+    /// <returns>加密流和nonce的元组</returns>
+    /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
+    /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
+    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
+    /// <remarks>
+    /// 注意：此方法返回的流实际上不是真正的GCM流式加密，
+    /// 而是一个包装器，会在关闭时计算并写入认证标签。
+    /// 对于真正的流式处理，请考虑使用CBC模式。
+    /// </remarks>
+    public static (AesGCMEncryptStreamWrapper streamWrapper, byte[] nonce) CreateAesGCMEncryptStream(Stream outputStream, string key)
+    {
+        if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
+        byte[] keyBytes = Convert.FromBase64String(key);
+        return CreateAesGCMEncryptStream(outputStream, keyBytes);
+    }
+
+    /// <summary>
+    /// 创建Aes-GCM加密流（使用随机nonce）
+    /// </summary>
+    /// <param name="outputStream">输出流</param>
+    /// <param name="keyBytes">密钥字节数组（16/24/32字节）</param>
+    /// <returns>加密流和nonce的元组</returns>
+    /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
+    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
+    /// <remarks>
+    /// 注意：此方法返回的流实际上不是真正的GCM流式加密，
+    /// 而是一个包装器，会在关闭时计算并写入认证标签。
+    /// 对于真正的流式处理，请考虑使用CBC模式。
+    /// </remarks>
+    public static (AesGCMEncryptStreamWrapper streamWrapper, byte[] nonce) CreateAesGCMEncryptStream(Stream outputStream, byte[] keyBytes)
+    {
+        if (outputStream is null) throw new ArgumentNullException(nameof(outputStream));
+        if (!outputStream.CanWrite) throw new ArgumentException("输出流必须可写", nameof(outputStream));
+        if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
+        if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）");
+
+        // 生成nonce
         byte[] nonce = new byte[AesGcmNonceSize];
         RandomNumberGenerator.Fill(nonce);
-        (byte[] tag, byte[] ciphertext) = AesGCMEncryptCore(content, keyBytes, nonce);
-        byte[] result = new byte[nonce.Length + tag.Length + ciphertext.Length];
-        Buffer.BlockCopy(nonce, 0, result, 0, nonce.Length);
-        Buffer.BlockCopy(tag, 0, result, nonce.Length, tag.Length);
-        Buffer.BlockCopy(ciphertext, 0, result, nonce.Length + tag.Length, ciphertext.Length);
-        return result;
+
+        // 创建包装器
+        AesGCMEncryptStreamWrapper wrapper = new(outputStream, keyBytes, nonce);
+
+        return (wrapper, nonce);
     }
 
     /// <summary>
-    /// Aes-GCM加密核心实现
+    /// 创建Aes-GCM解密流
     /// </summary>
-    /// <param name="content">要加密的内容</param>
-    /// <param name="keyBytes">密钥字节数组</param>
-    /// <param name="nonce">随机数（12字节）</param>
-    /// <returns>加密后的(tag, ciphertext)元组</returns>
-    private static (byte[] tag, byte[] ciphertext) AesGCMEncryptCore(byte[] content, byte[] keyBytes, byte[] nonce)
-    {
-        byte[] ciphertext = new byte[content.Length];
-        byte[] tag = new byte[AesGcmTagSize];
-        using AesGcm aesGcm = new(keyBytes, AesGcmTagSize);
-        aesGcm.Encrypt(nonce, content, ciphertext, tag);
-        return (tag, ciphertext);
-    }
-
-    /// <summary>
-    /// Aes-GCM解密
-    /// </summary>
-    /// <param name="content">Base64编码的加密数据（nonce + tag + ciphertext格式）</param>
+    /// <param name="inputStream">输入流</param>
     /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
-    /// <returns>解密后的原始内容（UTF-8编码）</returns>
+    /// <returns>解密流</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">解密失败或认证失败时抛出</exception>
-    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
-    /// <remarks>
-    /// 输入格式：Base64(nonce + tag + ciphertext)
-    /// 解密时会自动验证认证标签，如果数据被篡改会抛出异常。
-    /// 与 AesGCMEncrypt 方法配对使用。
-    /// </remarks>
-    public static byte[] AesGCMDecrypt(byte[] content, string key)
-    {
-        byte[] keyBytes = Convert.FromBase64String(key);
-        return AesGCMDecrypt(content, keyBytes);
-    }
-
-    /// <summary>
-    /// Aes-GCM解密
-    /// </summary>
-    /// <param name="content">Base64编码的加密数据（nonce + tag + ciphertext格式）</param>
-    /// <param name="keyBytes">Base64编码的密钥（16/24/32字节）</param>
-    /// <returns>解密后的原始内容（UTF-8编码）</returns>
-    /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">解密失败或认证失败时抛出</exception>
-    /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
-    /// <remarks>
-    /// 输入格式：Base64(nonce + tag + ciphertext)
-    /// 解密时会自动验证认证标签，如果数据被篡改会抛出异常。
-    /// 与 AesGCMEncrypt 方法配对使用。
-    /// </remarks>
-    public static byte[] AesGCMDecrypt(byte[] content, byte[] keyBytes)
-    {
-        if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
-        if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
-        if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）");
-        if (content.Length < AesGcmNonceSize + AesGcmTagSize) throw new ArgumentException("数据长度不足，无法提取nonce和tag");
-        byte[] nonce = new byte[AesGcmNonceSize];
-        byte[] tagAndCiphertext = new byte[content.Length - AesGcmNonceSize];
-        Buffer.BlockCopy(content, 0, nonce, 0, AesGcmNonceSize);
-        Buffer.BlockCopy(content, AesGcmNonceSize, tagAndCiphertext, 0, tagAndCiphertext.Length);
-        return AesGCMDecrypt(tagAndCiphertext, keyBytes, nonce);
-    }
-
-    /// <summary>
-    /// Aes-GCM解密（使用单独的nonce）
-    /// </summary>
-    /// <param name="content">Base64编码的加密数据（tag + ciphertext格式）</param>
-    /// <param name="key">Base64编码的密钥（16/24/32字节）</param>
-    /// <param name="nonce">Base64编码的nonce（12字节）</param>
-    /// <returns>解密后的原始内容（UTF-8编码）</returns>
-    /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">解密失败或认证失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
     /// <remarks>
-    /// 输入格式：Base64(tag + ciphertext)
-    /// - tag: 16字节（认证标签）
-    /// - ciphertext: 加密后的数据
-    /// nonce作为单独参数传入，解密时会自动验证认证标签，如果数据被篡改会抛出异常。
-    /// 与 AesGCMEncrypt(content, out key, out nonce) 方法配对使用。
+    /// 输入格式：nonce + tag + ciphertext
+    /// 注意：此方法返回的流实际上不是真正的GCM流式解密，
+    /// 而是一个包装器，会在读取时验证认证标签。
     /// </remarks>
-    public static byte[] AesGCMDecrypt(byte[] content, string key, string nonce)
+    public static AesGCMDecryptStreamWrapper CreateAesGCMDecryptStream(Stream inputStream, string key)
     {
+        if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        byte[] nonceBytes = Convert.FromBase64String(nonce);
-        return AesGCMDecrypt(content, keyBytes, nonceBytes);
+        return CreateAesGCMDecryptStream(inputStream, keyBytes);
     }
 
     /// <summary>
-    /// Aes-GCM解密（使用单独的nonce）
+    /// 创建Aes-GCM解密流
     /// </summary>
-    /// <param name="content">Base64编码的加密数据（tag + ciphertext格式）</param>
-    /// <param name="keyBytes">Base64编码的密钥（16/24/32字节）</param>
-    /// <param name="nonceBytes">nonce字节数组（12字节）</param>
-    /// <returns>解密后的原始内容（UTF-8编码）</returns>
+    /// <param name="inputStream">输入流</param>
+    /// <param name="keyBytes">密钥字节数组（16/24/32字节）</param>
+    /// <returns>解密流</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
-    /// <exception cref="CryptographicException">解密失败或认证失败时抛出</exception>
     /// <exception cref="PlatformNotSupportedException">在.NET Standard 2.0中不支持</exception>
     /// <remarks>
-    /// 输入格式：Base64(tag + ciphertext)
-    /// - tag: 16字节（认证标签）
-    /// - ciphertext: 加密后的数据
-    /// nonce作为单独参数传入，解密时会自动验证认证标签，如果数据被篡改会抛出异常。
-    /// 与 AesGCMEncrypt(content, out key, out nonce) 方法配对使用。
+    /// 输入格式：nonce + tag + ciphertext
+    /// 注意：此方法返回的流实际上不是真正的GCM流式解密，
+    /// 而是一个包装器，会在读取时验证认证标签。
     /// </remarks>
-    public static byte[] AesGCMDecrypt(byte[] content, byte[] keyBytes, byte[] nonceBytes)
+    public static AesGCMDecryptStreamWrapper CreateAesGCMDecryptStream(Stream inputStream, byte[] keyBytes)
     {
-        if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
+        if (inputStream is null) throw new ArgumentNullException(nameof(inputStream));
+        if (!inputStream.CanRead) throw new ArgumentException("输入流必须可读", nameof(inputStream));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
-        if (nonceBytes is null || nonceBytes.Length == 0) throw new ArgumentException("nonce不能为空", nameof(nonceBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）");
-        if (nonceBytes.Length != AesGcmNonceSize) throw new ArgumentException($"nonce长度必须为{AesGcmNonceSize}字节", nameof(nonceBytes));
-        if (content.Length < AesGcmTagSize) throw new ArgumentException("数据长度不足，无法提取tag");
-        byte[] tag = new byte[AesGcmTagSize];
-        byte[] ciphertext = new byte[content.Length - AesGcmTagSize];
-        Buffer.BlockCopy(content, 0, tag, 0, AesGcmTagSize);
-        Buffer.BlockCopy(content, AesGcmTagSize, ciphertext, 0, ciphertext.Length);
-        byte[] plaintext = new byte[ciphertext.Length];
-        using AesGcm aesGcm = new(keyBytes, AesGcmTagSize);
-        aesGcm.Decrypt(nonceBytes, ciphertext, tag, plaintext);
-        return plaintext;
+
+        // 创建包装器
+        AesGCMDecryptStreamWrapper wrapper = new(inputStream, keyBytes);
+
+        return wrapper;
     }
 #endif
     #endregion
 }
+

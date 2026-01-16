@@ -1,6 +1,5 @@
 ﻿using Materal.Utils.Crypto;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Materal.Utils.Test.CryptoTest;
 
