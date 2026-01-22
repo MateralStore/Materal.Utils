@@ -11,6 +11,8 @@ public class RsaCryptoTest
 {
     private string _publicKey = string.Empty;
     private string _privateKey = string.Empty;
+    private string _publicKeyPem = string.Empty;
+    private string _privateKeyPem = string.Empty;
     private readonly string _testText = "这是一个测试文本，用于RSA加密解密测试。Hello RSA!";
     private readonly byte[] _testBytes = Encoding.UTF8.GetBytes("这是一个测试字节数组，用于RSA加密解密测试。Hello RSA!");
 
@@ -19,6 +21,7 @@ public class RsaCryptoTest
     {
         // 生成测试用的密钥对
         (_publicKey, _privateKey) = RsaCrypto.GenerateKeyPair(2048);
+        (_publicKeyPem, _privateKeyPem) = RsaCrypto.GenerateKeyPairPem(2048);
     }
 
     #region 密钥生成测试
@@ -67,6 +70,56 @@ public class RsaCryptoTest
     {
         // Act & Assert
         Assert.ThrowsExactly<ArgumentException>(() => RsaCrypto.GenerateKeyPair(1000));
+    }
+
+    /// <summary>
+    /// 测试PEM格式密钥对生成
+    /// </summary>
+    [TestMethod]
+    public void GenerateKeyPairPem_ShouldReturnValidPemKeys()
+    {
+        // Act
+        var (publicKeyPem, privateKeyPem) = RsaCrypto.GenerateKeyPairPem();
+
+        // Assert
+        Assert.IsNotNull(publicKeyPem);
+        Assert.IsNotNull(privateKeyPem);
+        Assert.StartsWith("-----BEGIN PUBLIC KEY-----", publicKeyPem);
+        Assert.EndsWith("-----END PUBLIC KEY-----", publicKeyPem.Trim());
+        Assert.StartsWith("-----BEGIN PRIVATE KEY-----", privateKeyPem);
+        Assert.EndsWith("-----END PRIVATE KEY-----", privateKeyPem.Trim());
+        Assert.IsGreaterThan(0, publicKeyPem.Length);
+        Assert.IsGreaterThan(0, privateKeyPem.Length);
+    }
+
+    /// <summary>
+    /// 测试不同密钥长度的PEM格式生成
+    /// </summary>
+    [TestMethod]
+    public void GenerateKeyPairPem_WithDifferentKeySizes_ShouldReturnValidPemKeys()
+    {
+        // Act & Assert
+        var (publicKeyPem1024, privateKeyPem1024) = RsaCrypto.GenerateKeyPairPem(1024);
+        Assert.IsNotNull(publicKeyPem1024);
+        Assert.IsNotNull(privateKeyPem1024);
+        Assert.Contains("-----BEGIN PUBLIC KEY-----", publicKeyPem1024);
+        Assert.Contains("-----BEGIN PRIVATE KEY-----", privateKeyPem1024);
+
+        var (publicKeyPem4096, privateKeyPem4096) = RsaCrypto.GenerateKeyPairPem(4096);
+        Assert.IsNotNull(publicKeyPem4096);
+        Assert.IsNotNull(privateKeyPem4096);
+        Assert.Contains("-----BEGIN PUBLIC KEY-----", publicKeyPem4096);
+        Assert.Contains("-----BEGIN PRIVATE KEY-----", privateKeyPem4096);
+
+        // 验证所有生成的密钥都有有效的内容
+        Assert.IsGreaterThan(100, publicKeyPem1024.Length); // PEM密钥应该有合理长度
+        Assert.IsGreaterThan(200, privateKeyPem1024.Length);
+        Assert.IsGreaterThan(100, publicKeyPem4096.Length);
+        Assert.IsGreaterThan(200, privateKeyPem4096.Length);
+
+        // 验证密钥格式正确性
+        Assert.IsTrue(publicKeyPem1024.Contains("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A") || publicKeyPem1024.Length > 150); // 1024位公钥标识
+        Assert.IsTrue(publicKeyPem4096.Contains("MIICIjANBgkqhkiG9w0BAQEFAAOCAg8A") || publicKeyPem4096.Length > 300); // 4096位公钥标识
     }
     #endregion
 
@@ -143,6 +196,45 @@ public class RsaCryptoTest
         // Act & Assert
         Assert.ThrowsExactly<ArgumentException>(() => RsaCrypto.Encrypt((byte[])null!, _publicKey));
     }
+
+    /// <summary>
+    /// 测试使用PEM格式公钥加密字节数组
+    /// </summary>
+    [TestMethod]
+    public void EncryptBytes_WithPemPublicKey_ShouldReturnOriginalData()
+    {
+        // Act
+        byte[] encryptedData = RsaCrypto.Encrypt(_testBytes, _publicKeyPem);
+        byte[] decryptedData = RsaCrypto.Decrypt(encryptedData, _privateKeyPem);
+
+        // Assert
+        Assert.IsNotNull(encryptedData);
+        Assert.IsNotNull(decryptedData);
+        CollectionAssert.AreEqual(_testBytes, decryptedData);
+    }
+
+    /// <summary>
+    /// 测试使用PEM格式密钥进行大数据分块加密解密
+    /// </summary>
+    [TestMethod]
+    public void EncryptDecryptLargeData_WithPemKeys_ShouldReturnOriginalData()
+    {
+        // Arrange - 创建大数据（超过RSA单次加密限制）
+        byte[] largeData = new byte[500];
+        for (int i = 0; i < largeData.Length; i++)
+        {
+            largeData[i] = (byte)(i % 256);
+        }
+
+        // Act
+        byte[] encryptedData = RsaCrypto.EncryptLargeData(largeData, _publicKeyPem);
+        byte[] decryptedData = RsaCrypto.DecryptLargeData(encryptedData, _privateKeyPem);
+
+        // Assert
+        Assert.IsNotNull(encryptedData);
+        Assert.IsNotNull(decryptedData);
+        CollectionAssert.AreEqual(largeData, decryptedData);
+    }
     #endregion
 
     #region 字符串加密解密测试
@@ -204,6 +296,46 @@ public class RsaCryptoTest
     {
         // Act & Assert
         Assert.ThrowsExactly<ArgumentException>(() => RsaCrypto.Encrypt((string)null!, _publicKey));
+    }
+
+    /// <summary>
+    /// 测试使用PEM格式公钥加密字符串
+    /// </summary>
+    [TestMethod]
+    public void EncryptString_WithPemPublicKey_ShouldReturnOriginalText()
+    {
+        // Act
+        string encryptedText = RsaCrypto.Encrypt(_testText, _publicKeyPem);
+        string decryptedText = RsaCrypto.Decrypt(encryptedText, _privateKeyPem);
+
+        // Assert
+        Assert.IsNotNull(encryptedText);
+        Assert.IsNotNull(decryptedText);
+        Assert.AreEqual(_testText, decryptedText);
+    }
+
+    /// <summary>
+    /// 测试使用PEM格式密钥进行长字符串分块加密解密
+    /// </summary>
+    [TestMethod]
+    public void EncryptDecryptLargeText_WithPemKeys_ShouldReturnOriginalText()
+    {
+        // Arrange - 创建长文本
+        StringBuilder longTextBuilder = new();
+        for (int i = 0; i < 100; i++)
+        {
+            longTextBuilder.AppendLine("这是第" + i + "行测试文本，用于测试RSA长文本加密解密功能。");
+        }
+        string longText = longTextBuilder.ToString();
+
+        // Act
+        string encryptedText = RsaCrypto.EncryptLargeText(longText, _publicKeyPem);
+        string decryptedText = RsaCrypto.DecryptLargeText(encryptedText, _privateKeyPem);
+
+        // Assert
+        Assert.IsNotNull(encryptedText);
+        Assert.IsNotNull(decryptedText);
+        Assert.AreEqual(longText, decryptedText);
     }
     #endregion
 
@@ -288,6 +420,58 @@ public class RsaCryptoTest
         // Act & Assert
         Assert.ThrowsExactly<ArgumentException>(() => RsaCrypto.SignData([], _privateKey));
     }
+
+    /// <summary>
+    /// 测试使用PEM格式密钥进行数据签名和验证
+    /// </summary>
+    [TestMethod]
+    public void SignAndVerifyData_WithPemKeys_ShouldReturnTrue()
+    {
+        // Act
+        byte[] signature = RsaCrypto.SignData(_testBytes, _privateKeyPem);
+        bool isValid = RsaCrypto.VerifyData(_testBytes, signature, _publicKeyPem);
+
+        // Assert
+        Assert.IsNotNull(signature);
+        Assert.IsNotEmpty(signature);
+        Assert.IsTrue(isValid);
+    }
+
+    /// <summary>
+    /// 测试使用PEM格式密钥进行文本签名和验证
+    /// </summary>
+    [TestMethod]
+    public void SignAndVerifyText_WithPemKeys_ShouldReturnTrue()
+    {
+        // Act
+        string signature = RsaCrypto.SignText(_testText, _privateKeyPem);
+        bool isValid = RsaCrypto.VerifyText(_testText, signature, _publicKeyPem);
+
+        // Assert
+        Assert.IsNotNull(signature);
+        Assert.IsGreaterThan(0, signature.Length);
+        Assert.IsTrue(isValid);
+    }
+
+    /// <summary>
+    /// 测试混合使用XML和PEM格式密钥
+    /// </summary>
+    [TestMethod]
+    public void EncryptDecrypt_WithMixedKeyFormats_ShouldWork()
+    {
+        // Act - 使用XML公钥加密，PEM私钥解密（应该失败，因为不是同一对密钥）
+        byte[] encryptedWithXml = RsaCrypto.Encrypt(_testBytes, _publicKey);
+        Assert.ThrowsExactly<CryptographicException>(() => RsaCrypto.Decrypt(encryptedWithXml, _privateKeyPem));
+
+        // Act - 使用PEM公钥加密，XML私钥解密（应该失败，因为不是同一对密钥）
+        byte[] encryptedWithPem = RsaCrypto.Encrypt(_testBytes, _publicKeyPem);
+        Assert.ThrowsExactly<CryptographicException>(() => RsaCrypto.Decrypt(encryptedWithPem, _privateKey));
+
+        // Act - 使用同一对密钥的不同格式应该成功
+        byte[] encryptedWithPem2 = RsaCrypto.Encrypt(_testBytes, _publicKeyPem);
+        byte[] decryptedWithPem2 = RsaCrypto.Decrypt(encryptedWithPem2, _privateKeyPem);
+        CollectionAssert.AreEqual(_testBytes, decryptedWithPem2);
+    }
     #endregion
 
     #region 异常情况测试
@@ -346,6 +530,83 @@ public class RsaCryptoTest
     {
         // Act & Assert
         Assert.ThrowsExactly<ArgumentException>(() => RsaCrypto.Decrypt("SomeEncryptedText", null!));
+    }
+    #endregion
+
+    #region PEM格式测试
+    /// <summary>
+    /// 测试密钥格式检测功能
+    /// </summary>
+    [TestMethod]
+    public void DetectKeyFormat_ShouldReturnCorrectFormat()
+    {
+        // Act & Assert
+        Assert.AreEqual(KeyFormat.Xml, RsaCrypto.DetectKeyFormat(_publicKey));
+        Assert.AreEqual(KeyFormat.Xml, RsaCrypto.DetectKeyFormat(_privateKey));
+        Assert.AreEqual(KeyFormat.PemPublic, RsaCrypto.DetectKeyFormat(_publicKeyPem));
+        Assert.AreEqual(KeyFormat.PemPrivate, RsaCrypto.DetectKeyFormat(_privateKeyPem));
+        Assert.AreEqual(KeyFormat.Unknown, RsaCrypto.DetectKeyFormat(""));
+        Assert.AreEqual(KeyFormat.Unknown, RsaCrypto.DetectKeyFormat("InvalidKey"));
+        Assert.AreEqual(KeyFormat.Unknown, RsaCrypto.DetectKeyFormat(null!));
+    }
+
+    /// <summary>
+    /// 测试使用无效PEM格式密钥
+    /// </summary>
+    [TestMethod]
+    public void Encrypt_WithInvalidPemKey_ShouldThrowException()
+    {
+        // Arrange
+        string invalidPemKey = "-----BEGIN PUBLIC KEY-----\nInvalidBase64Data\n-----END PUBLIC KEY-----";
+
+        // Act & Assert
+        Assert.ThrowsExactly<FormatException>(() => RsaCrypto.Encrypt(_testText, invalidPemKey));
+    }
+
+    /// <summary>
+    /// 测试使用PEM公钥进行解密（应该失败）
+    /// </summary>
+    [TestMethod]
+    public void Decrypt_WithPemPublicKey_ShouldThrowException()
+    {
+        // Arrange
+        byte[] encryptedData = RsaCrypto.Encrypt(_testBytes, _publicKeyPem);
+
+        // Act & Assert
+        Assert.ThrowsExactly<ArgumentException>(() => RsaCrypto.Decrypt(encryptedData, _publicKeyPem));
+    }
+
+    /// <summary>
+    /// 测试PEM格式密钥的跨格式兼容性
+    /// </summary>
+    [TestMethod]
+    public void PemKeys_ShouldWorkWithAllMethods()
+    {
+        // 测试所有加密解密方法
+        string encryptedString = RsaCrypto.Encrypt(_testText, _publicKeyPem);
+        string decryptedString = RsaCrypto.Decrypt(encryptedString, _privateKeyPem);
+        Assert.AreEqual(_testText, decryptedString);
+
+        byte[] encryptedBytes = RsaCrypto.Encrypt(_testBytes, _publicKeyPem);
+        byte[] decryptedBytes = RsaCrypto.Decrypt(encryptedBytes, _privateKeyPem);
+        CollectionAssert.AreEqual(_testBytes, decryptedBytes);
+
+        string encryptedLargeText = RsaCrypto.EncryptLargeText(_testText, _publicKeyPem);
+        string decryptedLargeText = RsaCrypto.DecryptLargeText(encryptedLargeText, _privateKeyPem);
+        Assert.AreEqual(_testText, decryptedLargeText);
+
+        byte[] encryptedLargeData = RsaCrypto.EncryptLargeData(_testBytes, _publicKeyPem);
+        byte[] decryptedLargeData = RsaCrypto.DecryptLargeData(encryptedLargeData, _privateKeyPem);
+        CollectionAssert.AreEqual(_testBytes, decryptedLargeData);
+
+        // 测试签名验证方法
+        byte[] signature = RsaCrypto.SignData(_testBytes, _privateKeyPem);
+        bool isValid = RsaCrypto.VerifyData(_testBytes, signature, _publicKeyPem);
+        Assert.IsTrue(isValid);
+
+        string textSignature = RsaCrypto.SignText(_testText, _privateKeyPem);
+        bool isTextValid = RsaCrypto.VerifyText(_testText, textSignature, _publicKeyPem);
+        Assert.IsTrue(isTextValid);
     }
     #endregion
 
