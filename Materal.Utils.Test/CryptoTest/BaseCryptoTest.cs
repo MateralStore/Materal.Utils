@@ -412,7 +412,11 @@ public class BaseCryptoTest
 
         // Act & Assert
         Assert.ThrowsExactly<ArgumentException>(() => BaseCrypto.Encode("Test", sameCharDict));
+#if NET9_0_OR_GREATER
         Assert.ThrowsExactly<DivideByZeroException>(() => BaseCrypto.Decode("test", sameCharDict));
+#else
+        Assert.ThrowsExactly<FormatException>(() => BaseCrypto.Decode("test", sameCharDict));
+#endif
     }
 
     /// <summary>
