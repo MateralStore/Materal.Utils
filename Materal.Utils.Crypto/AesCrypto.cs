@@ -157,7 +157,7 @@ public static partial class AesCrypto
         if (decryptedBytes.Length > 0)
         {
             // PKCS7填充：最后一个字节的值表示填充的字节数
-            int paddingLength = decryptedBytes[decryptedBytes.Length - 1];
+            int paddingLength = decryptedBytes[^1];
             if (paddingLength > 0 && paddingLength <= 16 && paddingLength <= decryptedBytes.Length) // AES块大小为16字节，且填充长度不能超过数据长度
             {
                 // 验证填充是否正确
@@ -170,7 +170,7 @@ public static partial class AesCrypto
                         break;
                     }
                 }
-                
+
                 if (validPadding)
                 {
                     // 移除填充字节
@@ -180,7 +180,7 @@ public static partial class AesCrypto
                 }
             }
         }
-        
+
         // 如果没有填充或填充无效，写入全部数据
         outputStream.Write(decryptedBytes, 0, decryptedBytes.Length);
         return decryptedBytes.Length;
@@ -293,10 +293,10 @@ public static partial class AesCrypto
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.PKCS7;
         ICryptoTransform decryptor = aes.CreateDecryptor();
-        
+
         // 创建一个包装流，跳过IV部分
         Stream decryptedStream = new SkipIVStream(inputStream, iv.Length);
-        
+
 #if NET
         return new CryptoStream(decryptedStream, decryptor, CryptoStreamMode.Read, leaveOpen: true);
 #else
@@ -307,23 +307,14 @@ public static partial class AesCrypto
     /// <summary>
     /// 跳过IV的包装流
     /// </summary>
-    private class SkipIVStream : Stream
+    private class SkipIVStream(Stream innerStream, long skipBytes) : Stream
     {
-        private readonly Stream _innerStream;
-        private readonly long _skipBytes;
-        private long _position;
+        private long _position = 0;
 
-        public SkipIVStream(Stream innerStream, long skipBytes)
-        {
-            _innerStream = innerStream;
-            _skipBytes = skipBytes;
-            _position = 0;
-        }
-
-        public override bool CanRead => _innerStream.CanRead;
+        public override bool CanRead => innerStream.CanRead;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
-        public override long Length => _innerStream.Length - _skipBytes;
+        public override long Length => innerStream.Length - skipBytes;
         public override long Position
         {
             get => _position;
@@ -332,12 +323,12 @@ public static partial class AesCrypto
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int bytesRead = _innerStream.Read(buffer, offset, count);
+            int bytesRead = innerStream.Read(buffer, offset, count);
             _position += bytesRead;
             return bytesRead;
         }
 
-        public override void Flush() => _innerStream.Flush();
+        public override void Flush() => innerStream.Flush();
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
         public override void SetLength(long value) => throw new NotSupportedException();
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();

@@ -3,7 +3,7 @@
 namespace Materal.Utils.Crypto;
 
 /// <summary>
-/// Base64 加密解密工具类
+/// Base64 编码解码工具类
 /// </summary>
 public static partial class Base64Crypto
 {
