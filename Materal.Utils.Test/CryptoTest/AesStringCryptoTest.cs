@@ -29,14 +29,14 @@ public partial class AesStringCryptoTest
         string iv = Convert.ToBase64String(Encoding.UTF8.GetBytes("abcdefghijklmnop")); // 16字节
 
         // 加密
-        string encrypted = AesCrypto.AesCBCEncryptString(originalText, key, iv);
+        string encrypted = AesCrypto.CBCEncrypt(originalText, key, iv);
 
         // 验证加密结果不为空且不等于原文
         Assert.IsNotNull(encrypted, "加密结果不应为空");
         Assert.AreNotEqual(originalText, encrypted, "加密结果应不等于原文");
 
         // 解密
-        string decrypted = AesCrypto.AesCBCDecryptString(encrypted, key, iv);
+        string decrypted = AesCrypto.CBCDecrypt(encrypted, key, iv);
 
         // 验证解密结果与原文相同
         Assert.AreEqual(originalText, decrypted, "解密结果应与原文相同");
@@ -52,7 +52,7 @@ public partial class AesStringCryptoTest
         string originalText = "测试自动生成密钥的情况";
 
         // 加密（自动生成密钥和IV）
-        string encrypted = AesCrypto.AesCBCEncryptString(originalText, out string key, out string iv);
+        string encrypted = AesCrypto.CBCEncrypt(originalText, out string key, out string iv);
 
         // 验证生成的密钥和IV不为空
         Assert.IsNotNull(key, "生成的密钥不应为空");
@@ -60,7 +60,7 @@ public partial class AesStringCryptoTest
         Assert.IsNotNull(encrypted, "加密结果不应为空");
 
         // 解密
-        string decrypted = AesCrypto.AesCBCDecryptString(encrypted, key, iv);
+        string decrypted = AesCrypto.CBCDecrypt(encrypted, key, iv);
 
         // 验证解密结果与原文相同
         Assert.AreEqual(originalText, decrypted, "解密结果应与原文相同");
@@ -77,14 +77,14 @@ public partial class AesStringCryptoTest
         string key = Convert.ToBase64String(Encoding.UTF8.GetBytes("123456789012345678901234")); // 24字节
 
         // 加密（使用随机IV）
-        string encrypted = AesCrypto.AesCBCEncryptString(originalText, key);
+        string encrypted = AesCrypto.CBCEncrypt(originalText, key);
 
         // 验证加密结果
         Assert.IsNotNull(encrypted, "加密结果不应为空");
         Assert.AreNotEqual(originalText, encrypted, "加密结果应不等于原文");
 
         // 解密（自动提取IV）
-        string decrypted = AesCrypto.AesCBCDecryptString(encrypted, key);
+        string decrypted = AesCrypto.CBCDecrypt(encrypted, key);
 
         // 验证解密结果与原文相同
         Assert.AreEqual(originalText, decrypted, "解密结果应与原文相同");
@@ -102,13 +102,13 @@ public partial class AesStringCryptoTest
         string iv = Convert.ToBase64String(Encoding.UTF8.GetBytes("abcdefghijklmnop")); // 16字节
 
         // 使用GBK编码加密解密
-        string encryptedGBK = AesCrypto.AesCBCEncryptString(originalText, key, iv, Encoding.GetEncoding("GBK"));
-        string decryptedGBK = AesCrypto.AesCBCDecryptString(encryptedGBK, key, iv, Encoding.GetEncoding("GBK"));
+        string encryptedGBK = AesCrypto.CBCEncrypt(originalText, key, iv, Encoding.GetEncoding("GBK"));
+        string decryptedGBK = AesCrypto.CBCDecrypt(encryptedGBK, key, iv, Encoding.GetEncoding("GBK"));
         Assert.AreEqual(originalText, decryptedGBK, "GBK解密结果应与原文相同");
 
         // 使用UTF-8编码加密解密
-        string encryptedUTF8 = AesCrypto.AesCBCEncryptString(originalText, key, iv, Encoding.UTF8);
-        string decryptedUTF8 = AesCrypto.AesCBCDecryptString(encryptedUTF8, key, iv, Encoding.UTF8);
+        string encryptedUTF8 = AesCrypto.CBCEncrypt(originalText, key, iv, Encoding.UTF8);
+        string decryptedUTF8 = AesCrypto.CBCDecrypt(encryptedUTF8, key, iv, Encoding.UTF8);
         Assert.AreEqual(originalText, decryptedUTF8);
 
         // 验证不同编码的加密结果不同
@@ -125,10 +125,10 @@ public partial class AesStringCryptoTest
         string iv = Convert.ToBase64String(Encoding.UTF8.GetBytes("abcdefghijklmnop"));
 
         // 测试空字符串
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesCBCEncryptString("", key, iv), "空字符串应抛出异常");
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.CBCEncrypt("", key, iv), "空字符串应抛出异常");
 
         // 测试null
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesCBCEncryptString(null!, key, iv), "null值应抛出异常");
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.CBCEncrypt((string)null!, key, iv), "null值应抛出异常");
     }
 
     /// <summary>
@@ -141,10 +141,10 @@ public partial class AesStringCryptoTest
         string iv = Convert.ToBase64String(Encoding.UTF8.GetBytes("abcdefghijklmnop"));
 
         // 测试空字符串
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesCBCDecryptString("", key, iv), "空字符串应抛出异常");
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.CBCDecrypt("", key, iv), "空字符串应抛出异常");
 
         // 测试null
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesCBCDecryptString(null!, key, iv), "null值应抛出异常");
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.CBCDecrypt((string)null!, key, iv), "null值应抛出异常");
     }
 
     /// <summary>
@@ -157,7 +157,7 @@ public partial class AesStringCryptoTest
         string iv = Convert.ToBase64String(Encoding.UTF8.GetBytes("abcdefghijklmnop"));
 
         // 测试无效的Base64字符串
-        Assert.ThrowsExactly<FormatException>(() => AesCrypto.AesCBCDecryptString("InvalidBase64!!!", key, iv), "无效Base64应抛出异常");
+        Assert.ThrowsExactly<FormatException>(() => AesCrypto.CBCDecrypt("InvalidBase64!!!", key, iv), "无效Base64应抛出异常");
     }
 
     /// <summary>
@@ -173,13 +173,13 @@ public partial class AesStringCryptoTest
         string wrongIV = Convert.ToBase64String(Encoding.UTF8.GetBytes("ponmlkjihgfedcba"));
 
         // 正确加密
-        string encrypted = AesCrypto.AesCBCEncryptString(originalText, key, iv);
+        string encrypted = AesCrypto.CBCEncrypt(originalText, key, iv);
 
         // 使用错误的密钥解密应该抛出异常
-        Assert.ThrowsExactly<CryptographicException>(() => AesCrypto.AesCBCDecryptString(encrypted, wrongKey, iv), "使用错误密钥应抛出异常");
+        Assert.ThrowsExactly<CryptographicException>(() => AesCrypto.CBCDecrypt(encrypted, wrongKey, iv), "使用错误密钥应抛出异常");
 
         // 使用错误的IV解密应该抛出异常
-        Assert.ThrowsExactly<CryptographicException>(() => AesCrypto.AesCBCDecryptString(encrypted, key, wrongIV), "使用错误IV应抛出异常");
+        Assert.ThrowsExactly<CryptographicException>(() => AesCrypto.CBCDecrypt(encrypted, key, wrongIV), "使用错误IV应抛出异常");
     }
 
     /// <summary>
@@ -193,20 +193,20 @@ public partial class AesStringCryptoTest
 
         // 测试16字节密钥（AES-128）
         string key128 = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456"));
-        string encrypted128 = AesCrypto.AesCBCEncryptString(originalText, key128, iv);
-        string decrypted128 = AesCrypto.AesCBCDecryptString(encrypted128, key128, iv);
+        string encrypted128 = AesCrypto.CBCEncrypt(originalText, key128, iv);
+        string decrypted128 = AesCrypto.CBCDecrypt(encrypted128, key128, iv);
         Assert.AreEqual(originalText, decrypted128);
 
         // 测试24字节密钥（AES-192）
         string key192 = Convert.ToBase64String(Encoding.UTF8.GetBytes("123456789012345678901234"));
-        string encrypted192 = AesCrypto.AesCBCEncryptString(originalText, key192, iv);
-        string decrypted192 = AesCrypto.AesCBCDecryptString(encrypted192, key192, iv);
+        string encrypted192 = AesCrypto.CBCEncrypt(originalText, key192, iv);
+        string decrypted192 = AesCrypto.CBCDecrypt(encrypted192, key192, iv);
         Assert.AreEqual(originalText, decrypted192);
 
         // 测试32字节密钥（AES-256）
         string key256 = Convert.ToBase64String(Encoding.UTF8.GetBytes("12345678901234567890123456789012"));
-        string encrypted256 = AesCrypto.AesCBCEncryptString(originalText, key256, iv);
-        string decrypted256 = AesCrypto.AesCBCDecryptString(encrypted256, key256, iv);
+        string encrypted256 = AesCrypto.CBCEncrypt(originalText, key256, iv);
+        string decrypted256 = AesCrypto.CBCDecrypt(encrypted256, key256, iv);
         Assert.AreEqual(originalText, decrypted256);
 
         // 验证不同密钥长度产生不同的加密结果
@@ -228,14 +228,14 @@ public partial class AesStringCryptoTest
         string key = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456")); // 16字节
 
         // 加密
-        string encrypted = AesCrypto.AesGCMEncryptString(originalText, key);
+        string encrypted = AesCrypto.GCMEncrypt(originalText, key);
 
         // 验证加密结果
         Assert.IsNotNull(encrypted, "加密结果不应为空");
         Assert.AreNotEqual(originalText, encrypted, "加密结果应不等于原文");
 
         // 解密
-        string decrypted = AesCrypto.AesGCMDecryptString(encrypted, key);
+        string decrypted = AesCrypto.GCMDecrypt(encrypted, key);
 
         // 验证解密结果与原文相同
         Assert.AreEqual(originalText, decrypted, "解密结果应与原文相同");
@@ -251,7 +251,7 @@ public partial class AesStringCryptoTest
         string originalText = "测试GCM自动生成密钥的情况";
 
         // 加密（自动生成密钥和nonce）
-        string encrypted = AesCrypto.AesGCMEncryptString(originalText, out string key, out string nonce);
+        string encrypted = AesCrypto.GCMEncrypt(originalText, out string key, out string nonce);
 
         // 验证生成的密钥和nonce不为空
         Assert.IsNotNull(key, "生成的密钥不应为空");
@@ -259,7 +259,7 @@ public partial class AesStringCryptoTest
         Assert.IsNotNull(encrypted, "加密结果不应为空");
 
         // 解密（使用单独的nonce）
-        string decrypted = AesCrypto.AesGCMDecryptString(encrypted, key, nonce);
+        string decrypted = AesCrypto.GCMDecrypt(encrypted, key, nonce);
 
         // 验证解密结果与原文相同
         Assert.AreEqual(originalText, decrypted, "解密结果应与原文相同");
@@ -276,13 +276,13 @@ public partial class AesStringCryptoTest
         string key = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456")); // 16字节
 
         // 使用UTF-8编码加密解密
-        string encryptedUTF8 = AesCrypto.AesGCMEncryptString(originalText, key, Encoding.UTF8);
-        string decryptedUTF8 = AesCrypto.AesGCMDecryptString(encryptedUTF8, key, Encoding.UTF8);
+        string encryptedUTF8 = AesCrypto.GCMEncrypt(originalText, key, Encoding.UTF8);
+        string decryptedUTF8 = AesCrypto.GCMDecrypt(encryptedUTF8, key, Encoding.UTF8);
         Assert.AreEqual(originalText, decryptedUTF8);
 
         // 使用Unicode编码加密解密
-        string encryptedUnicode = AesCrypto.AesGCMEncryptString(originalText, key, Encoding.Unicode);
-        string decryptedUnicode = AesCrypto.AesGCMDecryptString(encryptedUnicode, key, Encoding.Unicode);
+        string encryptedUnicode = AesCrypto.GCMEncrypt(originalText, key, Encoding.Unicode);
+        string decryptedUnicode = AesCrypto.GCMDecrypt(encryptedUnicode, key, Encoding.Unicode);
         Assert.AreEqual(originalText, decryptedUnicode);
 
         // 验证不同编码的加密结果不同
@@ -298,10 +298,10 @@ public partial class AesStringCryptoTest
         string key = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456"));
 
         // 测试空字符串
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesGCMEncryptString("", key), "空字符串应抛出异常");
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GCMEncrypt("", key), "空字符串应抛出异常");
 
         // 测试null
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesGCMEncryptString(null!, key), "null值应抛出异常");
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GCMEncrypt((string)null!, key), "null值应抛出异常");
     }
 
     /// <summary>
@@ -313,10 +313,10 @@ public partial class AesStringCryptoTest
         string key = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456"));
 
         // 测试空字符串
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesGCMDecryptString("", key), "空字符串应抛出异常");
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GCMDecrypt("", key), "空字符串应抛出异常");
 
         // 测试null
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesGCMDecryptString(null!, key), "null值应抛出异常");
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GCMDecrypt((string)null!, key), "null值应抛出异常");
     }
 
     /// <summary>
@@ -328,7 +328,7 @@ public partial class AesStringCryptoTest
         string key = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456"));
 
         // 测试无效的Base64字符串
-        Assert.ThrowsExactly<FormatException>(() => AesCrypto.AesGCMDecryptString("InvalidBase64!!!", key), "无效Base64应抛出异常");
+        Assert.ThrowsExactly<FormatException>(() => AesCrypto.GCMDecrypt("InvalidBase64!!!", key), "无效Base64应抛出异常");
     }
 
     /// <summary>
@@ -342,10 +342,10 @@ public partial class AesStringCryptoTest
         string wrongKey = Convert.ToBase64String(Encoding.UTF8.GetBytes("6543210987654321"));
 
         // 正确加密
-        string encrypted = AesCrypto.AesGCMEncryptString(originalText, key);
+        string encrypted = AesCrypto.GCMEncrypt(originalText, key);
 
         // 使用错误的密钥解密应该抛出异常
-        Assert.ThrowsExactly<AuthenticationTagMismatchException>(() => AesCrypto.AesGCMDecryptString(encrypted, wrongKey));
+        Assert.ThrowsExactly<AuthenticationTagMismatchException>(() => AesCrypto.GCMDecrypt(encrypted, wrongKey));
     }
 
     /// <summary>
@@ -358,7 +358,7 @@ public partial class AesStringCryptoTest
         string key = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456"));
 
         // 正确加密
-        string encrypted = AesCrypto.AesGCMEncryptString(originalText, key);
+        string encrypted = AesCrypto.GCMEncrypt(originalText, key);
 
         // 篡改加密数据（修改Base64字符串的一个字符）
         byte[] encryptedBytes = Convert.FromBase64String(encrypted);
@@ -366,7 +366,7 @@ public partial class AesStringCryptoTest
         string tamperedEncrypted = Convert.ToBase64String(encryptedBytes);
 
         // 解密被篡改的数据应该抛出异常
-        Assert.ThrowsExactly<AuthenticationTagMismatchException>(() => AesCrypto.AesGCMDecryptString(tamperedEncrypted, key));
+        Assert.ThrowsExactly<AuthenticationTagMismatchException>(() => AesCrypto.GCMDecrypt(tamperedEncrypted, key));
     }
 
     /// <summary>
@@ -379,20 +379,20 @@ public partial class AesStringCryptoTest
 
         // 测试16字节密钥（AES-128）
         string key128 = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456"));
-        string encrypted128 = AesCrypto.AesGCMEncryptString(originalText, key128);
-        string decrypted128 = AesCrypto.AesGCMDecryptString(encrypted128, key128);
+        string encrypted128 = AesCrypto.GCMEncrypt(originalText, key128);
+        string decrypted128 = AesCrypto.GCMDecrypt(encrypted128, key128);
         Assert.AreEqual(originalText, decrypted128);
 
         // 测试24字节密钥（AES-192）
         string key192 = Convert.ToBase64String(Encoding.UTF8.GetBytes("123456789012345678901234"));
-        string encrypted192 = AesCrypto.AesGCMEncryptString(originalText, key192);
-        string decrypted192 = AesCrypto.AesGCMDecryptString(encrypted192, key192);
+        string encrypted192 = AesCrypto.GCMEncrypt(originalText, key192);
+        string decrypted192 = AesCrypto.GCMDecrypt(encrypted192, key192);
         Assert.AreEqual(originalText, decrypted192);
 
         // 测试32字节密钥（AES-256）
         string key256 = Convert.ToBase64String(Encoding.UTF8.GetBytes("12345678901234567890123456789012"));
-        string encrypted256 = AesCrypto.AesGCMEncryptString(originalText, key256);
-        string decrypted256 = AesCrypto.AesGCMDecryptString(encrypted256, key256);
+        string encrypted256 = AesCrypto.GCMEncrypt(originalText, key256);
+        string decrypted256 = AesCrypto.GCMDecrypt(encrypted256, key256);
         Assert.AreEqual(originalText, decrypted256);
 
         // 验证不同密钥长度产生不同的加密结果
@@ -410,15 +410,15 @@ public partial class AesStringCryptoTest
         string key = Convert.ToBase64String(Encoding.UTF8.GetBytes("1234567890123456"));
 
         // 使用相同密钥加密两次，应该产生不同的结果（因为nonce不同）
-        string encrypted1 = AesCrypto.AesGCMEncryptString(originalText, key);
-        string encrypted2 = AesCrypto.AesGCMEncryptString(originalText, key);
+        string encrypted1 = AesCrypto.GCMEncrypt(originalText, key);
+        string encrypted2 = AesCrypto.GCMEncrypt(originalText, key);
 
         // 加密结果应该不同
         Assert.AreNotEqual(encrypted1, encrypted2);
 
         // 但解密结果应该相同
-        string decrypted1 = AesCrypto.AesGCMDecryptString(encrypted1, key);
-        string decrypted2 = AesCrypto.AesGCMDecryptString(encrypted2, key);
+        string decrypted1 = AesCrypto.GCMDecrypt(encrypted1, key);
+        string decrypted2 = AesCrypto.GCMDecrypt(encrypted2, key);
         Assert.AreEqual(originalText, decrypted1);
         Assert.AreEqual(originalText, decrypted2);
     }

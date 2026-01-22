@@ -13,7 +13,7 @@ public static partial class AesCrypto
     /// 注意：这不是真正的GCM流式加密，而是一个包装器实现。
     /// 真正的GCM加密需要在知道所有数据后才能计算认证标签。
     /// </remarks>
-    public class AesGCMEncryptStreamWrapper(Stream outputStream, byte[] key, byte[] nonce) : Stream
+    public class GCMEncryptStreamWrapper(Stream outputStream, byte[] key, byte[] nonce) : Stream
     {
         private readonly MemoryStream _buffer = new();
         private bool _disposed;
@@ -74,18 +74,18 @@ public static partial class AesCrypto
             {
                 // 获取所有数据
                 byte[] data = _buffer.ToArray();
-                
+
                 // 使用GCM加密
                 byte[] ciphertext = new byte[data.Length];
-                byte[] tag = new byte[AesGcmTagSize];
-                using AesGcm aesGcm = new(key, AesGcmTagSize);
+                byte[] tag = new byte[GCMTagSize];
+                using AesGcm aesGcm = new(key, GCMTagSize);
                 aesGcm.Encrypt(nonce, data, ciphertext, tag);
-                
+
                 // 写入nonce、tag和ciphertext
                 outputStream.Write(nonce, 0, nonce.Length);
                 outputStream.Write(tag, 0, tag.Length);
                 outputStream.Write(ciphertext, 0, ciphertext.Length);
-                
+
                 _buffer.Dispose();
                 _disposed = true;
             }

@@ -24,13 +24,13 @@ public static partial class AesCrypto
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static long AesCBCEncryptStream(Stream inputStream, Stream outputStream, string key, string iv, int bufferSize = 8192)
+    public static long CBCEncrypt(Stream inputStream, Stream outputStream, string key, string iv, int bufferSize = 8192)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         if (iv is null) throw new ArgumentException("初始化向量不能为空", nameof(iv));
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] ivBytes = Convert.FromBase64String(iv);
-        return AesCBCEncryptStream(inputStream, outputStream, keyBytes, ivBytes, bufferSize);
+        return CBCEncrypt(inputStream, outputStream, keyBytes, ivBytes, bufferSize);
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public static partial class AesCrypto
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static long AesCBCEncryptStream(Stream inputStream, Stream outputStream, byte[] keyBytes, byte[] ivBytes, int bufferSize = 8192)
+    public static long CBCEncrypt(Stream inputStream, Stream outputStream, byte[] keyBytes, byte[] ivBytes, int bufferSize = 8192)
     {
         ValidateStreamParameters(inputStream, outputStream);
         ValidateKeyBytes(keyBytes);
@@ -92,13 +92,13 @@ public static partial class AesCrypto
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
-    public static long AesCBCDecryptStream(Stream inputStream, Stream outputStream, string key, string iv, int bufferSize = 8192)
+    public static long CBCDecrypt(Stream inputStream, Stream outputStream, string key, string iv, int bufferSize = 8192)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         if (iv is null) throw new ArgumentException("初始化向量不能为空", nameof(iv));
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] ivBytes = Convert.FromBase64String(iv);
-        return AesCBCDecryptStream(inputStream, outputStream, keyBytes, ivBytes, bufferSize);
+        return CBCDecrypt(inputStream, outputStream, keyBytes, ivBytes, bufferSize);
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public static partial class AesCrypto
     /// <returns>解密的字节总数</returns>
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
-    public static long AesCBCDecryptStream(Stream inputStream, Stream outputStream, byte[] keyBytes, byte[] ivBytes, int bufferSize = 8192)
+    public static long CBCDecrypt(Stream inputStream, Stream outputStream, byte[] keyBytes, byte[] ivBytes, int bufferSize = 8192)
     {
         ValidateStreamParameters(inputStream, outputStream);
         ValidateKeyBytes(keyBytes);
@@ -155,11 +155,11 @@ public static partial class AesCrypto
     /// IV会自动写入到输出流的开始位置。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static (CryptoStream cryptoStream, byte[] iv) CreateAesCBCEncryptStream(Stream outputStream, string key)
+    public static (CryptoStream cryptoStream, byte[] iv) CreateCBCEncryptStream(Stream outputStream, string key)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return CreateAesCBCEncryptStream(outputStream, keyBytes);
+        return CreateCBCEncryptStream(outputStream, keyBytes);
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public static partial class AesCrypto
     /// IV会自动写入到输出流的开始位置。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static (CryptoStream cryptoStream, byte[] iv) CreateAesCBCEncryptStream(Stream outputStream, byte[] keyBytes)
+    public static (CryptoStream cryptoStream, byte[] iv) CreateCBCEncryptStream(Stream outputStream, byte[] keyBytes)
     {
         ValidateStreamParameters(null, outputStream, false, true);
         ValidateKeyBytes(keyBytes);
@@ -211,11 +211,11 @@ public static partial class AesCrypto
     /// 与 CreateAesCBCEncryptStream 方法配对使用。
     /// 注意：返回的流必须正确释放以确保资源清理。
     /// </remarks>
-    public static AesCBCDecryptStreamWrapper CreateAesCBCDecryptStream(Stream inputStream, string key)
+    public static CBCDecryptStreamWrapper CreateCBCDecryptStream(Stream inputStream, string key)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return CreateAesCBCDecryptStream(inputStream, keyBytes);
+        return CreateCBCDecryptStream(inputStream, keyBytes);
     }
 
     /// <summary>
@@ -231,7 +231,7 @@ public static partial class AesCrypto
     /// 与 CreateAesCBCEncryptStream 方法配对使用。
     /// 注意：返回的流必须正确释放以确保资源清理。
     /// </remarks>
-    public static AesCBCDecryptStreamWrapper CreateAesCBCDecryptStream(Stream inputStream, byte[] keyBytes)
+    public static CBCDecryptStreamWrapper CreateCBCDecryptStream(Stream inputStream, byte[] keyBytes)
     {
         ValidateStreamParameters(inputStream, null, true, false);
         ValidateKeyBytes(keyBytes);
@@ -241,7 +241,7 @@ public static partial class AesCrypto
         int bytesRead = inputStream.Read(iv, 0, iv.Length);
         if (bytesRead != 16) throw new ArgumentException("无法读取完整的IV", nameof(inputStream));
 
-        return new AesCBCDecryptStreamWrapper(inputStream, keyBytes, iv);
+        return new CBCDecryptStreamWrapper(inputStream, keyBytes, iv);
     }
     #endregion
     #region Aes-GCM 认证加密（AEAD）
@@ -267,11 +267,11 @@ public static partial class AesCrypto
     /// 对于大文件，建议使用分块处理或CBC模式。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static long AesGCMEncryptToStream(Stream inputStream, Stream outputStream, string key, int bufferSize = 8192)
+    public static long GCMEncrypt(Stream inputStream, Stream outputStream, string key, int bufferSize = 8192)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesGCMEncryptToStream(inputStream, outputStream, keyBytes, bufferSize, null);
+        return GCMEncrypt(inputStream, outputStream, keyBytes, bufferSize, null);
     }
 
     /// <summary>
@@ -296,11 +296,11 @@ public static partial class AesCrypto
     /// 对于大文件，建议使用分块处理或CBC模式。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static long AesGCMEncryptToStream(Stream inputStream, Stream outputStream, string key, Action<long, long>? progressCallback, int bufferSize = 8192)
+    public static long GCMEncrypt(Stream inputStream, Stream outputStream, string key, Action<long, long>? progressCallback, int bufferSize = 8192)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesGCMEncryptToStream(inputStream, outputStream, keyBytes, bufferSize, progressCallback);
+        return GCMEncrypt(inputStream, outputStream, keyBytes, bufferSize, progressCallback);
     }
 
     /// <summary>
@@ -324,7 +324,7 @@ public static partial class AesCrypto
     /// 对于大文件，建议使用分块处理或CBC模式。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static long AesGCMEncryptToStream(Stream inputStream, Stream outputStream, byte[] keyBytes, int bufferSize = 8192, Action<long, long>? progressCallback = null)
+    public static long GCMEncrypt(Stream inputStream, Stream outputStream, byte[] keyBytes, int bufferSize = 8192, Action<long, long>? progressCallback = null)
     {
         ValidateStreamParameters(inputStream, outputStream);
         ValidateKeyBytes(keyBytes);
@@ -353,7 +353,7 @@ public static partial class AesCrypto
         }
 
         // 使用GCM加密
-        byte[] encryptedBytes = AesGCMEncrypt(contentBytes, keyBytes);
+        byte[] encryptedBytes = GCMEncrypt(contentBytes, keyBytes);
 
         // 写入输出流
         outputStream.Write(encryptedBytes, 0, encryptedBytes.Length);
@@ -377,11 +377,11 @@ public static partial class AesCrypto
     /// 注意：由于GCM不支持真正的流式解密，此方法会将整个流读入内存。
     /// 对于大文件，建议使用分块处理或CBC模式。
     /// </remarks>
-    public static long AesGCMDecryptFromStream(Stream inputStream, Stream outputStream, string key, int bufferSize = 8192)
+    public static long GCMDecrypt(Stream inputStream, Stream outputStream, string key, int bufferSize = 8192)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesGCMDecryptFromStream(inputStream, outputStream, keyBytes, bufferSize, null);
+        return GCMDecrypt(inputStream, outputStream, keyBytes, bufferSize, null);
     }
 
     /// <summary>
@@ -401,11 +401,11 @@ public static partial class AesCrypto
     /// 注意：由于GCM不支持真正的流式解密，此方法会将整个流读入内存。
     /// 对于大文件，建议使用分块处理或CBC模式。
     /// </remarks>
-    public static long AesGCMDecryptFromStream(Stream inputStream, Stream outputStream, string key, Action<long, long>? progressCallback, int bufferSize = 8192)
+    public static long GCMDecrypt(Stream inputStream, Stream outputStream, string key, Action<long, long>? progressCallback, int bufferSize = 8192)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesGCMDecryptFromStream(inputStream, outputStream, keyBytes, bufferSize, progressCallback);
+        return GCMDecrypt(inputStream, outputStream, keyBytes, bufferSize, progressCallback);
     }
 
     /// <summary>
@@ -425,7 +425,7 @@ public static partial class AesCrypto
     /// 注意：由于GCM不支持真正的流式解密，此方法会将整个流读入内存。
     /// 对于大文件，建议使用分块处理或CBC模式。
     /// </remarks>
-    public static long AesGCMDecryptFromStream(Stream inputStream, Stream outputStream, byte[] keyBytes, int bufferSize = 8192, Action<long, long>? progressCallback = null)
+    public static long GCMDecrypt(Stream inputStream, Stream outputStream, byte[] keyBytes, int bufferSize = 8192, Action<long, long>? progressCallback = null)
     {
         ValidateStreamParameters(inputStream, outputStream);
         ValidateKeyBytes(keyBytes);
@@ -454,7 +454,7 @@ public static partial class AesCrypto
         }
 
         // 使用GCM解密
-        byte[] decryptedBytes = AesGCMDecrypt(contentBytes, keyBytes);
+        byte[] decryptedBytes = GCMDecrypt(contentBytes, keyBytes);
 
         // 写入输出流
         outputStream.Write(decryptedBytes, 0, decryptedBytes.Length);
@@ -476,11 +476,11 @@ public static partial class AesCrypto
     /// 而是一个包装器，会在关闭时计算并写入认证标签。
     /// 对于真正的流式处理，请考虑使用CBC模式。
     /// </remarks>
-    public static (AesGCMEncryptStreamWrapper streamWrapper, byte[] nonce) CreateAesGCMEncryptStream(Stream outputStream, string key)
+    public static (GCMEncryptStreamWrapper streamWrapper, byte[] nonce) CreateGCMEncryptStream(Stream outputStream, string key)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return CreateAesGCMEncryptStream(outputStream, keyBytes);
+        return CreateGCMEncryptStream(outputStream, keyBytes);
     }
 
     /// <summary>
@@ -496,17 +496,17 @@ public static partial class AesCrypto
     /// 而是一个包装器，会在关闭时计算并写入认证标签。
     /// 对于真正的流式处理，请考虑使用CBC模式。
     /// </remarks>
-    public static (AesGCMEncryptStreamWrapper streamWrapper, byte[] nonce) CreateAesGCMEncryptStream(Stream outputStream, byte[] keyBytes)
+    public static (GCMEncryptStreamWrapper streamWrapper, byte[] nonce) CreateGCMEncryptStream(Stream outputStream, byte[] keyBytes)
     {
         ValidateStreamParameters(null, outputStream, false, true);
         ValidateKeyBytes(keyBytes);
 
         // 生成nonce
-        byte[] nonce = new byte[AesGcmNonceSize];
+        byte[] nonce = new byte[GCMNonceSize];
         RandomNumberGenerator.Fill(nonce);
 
         // 创建包装器
-        AesGCMEncryptStreamWrapper wrapper = new(outputStream, keyBytes, nonce);
+        GCMEncryptStreamWrapper wrapper = new(outputStream, keyBytes, nonce);
 
         return (wrapper, nonce);
     }
@@ -525,11 +525,11 @@ public static partial class AesCrypto
     /// 注意：此方法返回的流实际上不是真正的GCM流式解密，
     /// 而是一个包装器，会在读取时验证认证标签。
     /// </remarks>
-    public static AesGCMDecryptStreamWrapper CreateAesGCMDecryptStream(Stream inputStream, string key)
+    public static GCMDecryptStreamWrapper CreateGCMDecryptStream(Stream inputStream, string key)
     {
         if (key is null) throw new ArgumentException("密钥不能为空", nameof(key));
         byte[] keyBytes = Convert.FromBase64String(key);
-        return CreateAesGCMDecryptStream(inputStream, keyBytes);
+        return CreateGCMDecryptStream(inputStream, keyBytes);
     }
 
     /// <summary>
@@ -545,13 +545,13 @@ public static partial class AesCrypto
     /// 注意：此方法返回的流实际上不是真正的GCM流式解密，
     /// 而是一个包装器，会在读取时验证认证标签。
     /// </remarks>
-    public static AesGCMDecryptStreamWrapper CreateAesGCMDecryptStream(Stream inputStream, byte[] keyBytes)
+    public static GCMDecryptStreamWrapper CreateGCMDecryptStream(Stream inputStream, byte[] keyBytes)
     {
         ValidateStreamParameters(inputStream, null, true, false);
         ValidateKeyBytes(keyBytes);
 
         // 创建包装器
-        AesGCMDecryptStreamWrapper wrapper = new(inputStream, keyBytes);
+        GCMDecryptStreamWrapper wrapper = new(inputStream, keyBytes);
 
         return wrapper;
     }

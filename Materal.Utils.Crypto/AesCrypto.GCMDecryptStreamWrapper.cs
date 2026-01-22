@@ -14,7 +14,7 @@ public static partial class AesCrypto
     /// 注意：这不是真正的GCM流式解密，而是一个包装器实现。
     /// 真正的GCM解密需要读取所有数据后才能验证认证标签。
     /// </remarks>
-    public class AesGCMDecryptStreamWrapper(Stream inputStream, byte[] key) : Stream
+    public class GCMDecryptStreamWrapper(Stream inputStream, byte[] key) : Stream
     {
         private byte[] _nonce = null!;
         private byte[] _tag = null!;
@@ -28,12 +28,12 @@ public static partial class AesCrypto
             if (_initialized) return;
 
             // 读取nonce
-            _nonce = new byte[AesGcmNonceSize];
+            _nonce = new byte[GCMNonceSize];
             int bytesRead = inputStream.Read(_nonce, 0, _nonce.Length);
             if (bytesRead != _nonce.Length) throw new ArgumentException("无法读取完整的nonce");
 
             // 读取tag
-            _tag = new byte[AesGcmTagSize];
+            _tag = new byte[GCMTagSize];
             bytesRead = inputStream.Read(_tag, 0, _tag.Length);
             if (bytesRead != _tag.Length) throw new ArgumentException("无法读取完整的认证标签");
 
@@ -44,7 +44,7 @@ public static partial class AesCrypto
 
             // 解密
             byte[] plaintext = new byte[_ciphertext.Length];
-            using AesGcm aesGcm = new(key, AesGcmTagSize);
+            using AesGcm aesGcm = new(key, GCMTagSize);
             aesGcm.Decrypt(_nonce, _ciphertext, _tag, plaintext);
 
             _decryptedStream = new MemoryStream(plaintext);

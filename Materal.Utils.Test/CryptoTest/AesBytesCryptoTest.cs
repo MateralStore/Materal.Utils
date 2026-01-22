@@ -27,7 +27,7 @@ public partial class AesBytesCryptoTest
     public void GenerateAesCBCKey_ShouldReturnValidKeyAndIV()
     {
         // Act
-        (byte[] key, byte[] iv) = AesCrypto.GenerateAesCBCKey();
+        (byte[] key, byte[] iv) = AesCrypto.GenerateCBCKey();
 
         // Assert
         Assert.IsNotNull(key);
@@ -46,7 +46,7 @@ public partial class AesBytesCryptoTest
     public void GenerateAesCBCStringKey_ShouldReturnValidBase64KeyAndIV()
     {
         // Act
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
 
         // Assert
         Assert.IsNotNull(key);
@@ -71,11 +71,11 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncryptDecrypt_WithStringKey_ShouldReturnOriginalContent()
     {
         // Arrange
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
 
         // Act
-        byte[] encrypted = AesCrypto.AesCBCEncrypt(_testBytes, key, iv);
-        byte[] decrypted = AesCrypto.AesCBCDecrypt(encrypted, key, iv);
+        byte[] encrypted = AesCrypto.CBCEncrypt(_testBytes, key, iv);
+        byte[] decrypted = AesCrypto.CBCDecrypt(encrypted, key, iv);
 
         // Assert
         CollectionAssert.AreEqual(_testBytes, decrypted);
@@ -90,11 +90,11 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncryptDecrypt_WithByteArrayKey_ShouldReturnOriginalContent()
     {
         // Arrange
-        (byte[]? keyBytes, byte[]? ivBytes) = AesCrypto.GenerateAesCBCKey();
+        (byte[]? keyBytes, byte[]? ivBytes) = AesCrypto.GenerateCBCKey();
 
         // Act
-        byte[] encrypted = AesCrypto.AesCBCEncrypt(_testBytes, keyBytes, ivBytes);
-        byte[] decrypted = AesCrypto.AesCBCDecrypt(encrypted, keyBytes, ivBytes);
+        byte[] encrypted = AesCrypto.CBCEncrypt(_testBytes, keyBytes, ivBytes);
+        byte[] decrypted = AesCrypto.CBCDecrypt(encrypted, keyBytes, ivBytes);
 
         // Assert
         CollectionAssert.AreEqual(_testBytes, decrypted);
@@ -111,8 +111,8 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncrypt_WithOutKeyAndIV_ShouldGenerateValidKeyAndIV()
     {
         // Act
-        byte[] encrypted = AesCrypto.AesCBCEncrypt(_testBytes, out string key, out string iv);
-        byte[] decrypted = AesCrypto.AesCBCDecrypt(encrypted, key, iv);
+        byte[] encrypted = AesCrypto.CBCEncrypt(_testBytes, out string key, out string iv);
+        byte[] decrypted = AesCrypto.CBCDecrypt(encrypted, key, iv);
 
         // Assert
         Assert.IsNotNull(key);
@@ -130,13 +130,13 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncrypt_WithRandomIV_ShouldReturnValidEncryptedData()
     {
         // Arrange
-        (string? key, string _) = AesCrypto.GenerateAesCBCStringKey();
+        (string? key, string _) = AesCrypto.GenerateCBCStringKey();
 
         // Act
-        byte[] encrypted1 = AesCrypto.AesCBCEncrypt(_testBytes, key);
-        byte[] encrypted2 = AesCrypto.AesCBCEncrypt(_testBytes, key);
-        byte[] decrypted1 = AesCrypto.AesCBCDecrypt(encrypted1, key);
-        byte[] decrypted2 = AesCrypto.AesCBCDecrypt(encrypted2, key);
+        byte[] encrypted1 = AesCrypto.CBCEncrypt(_testBytes, key);
+        byte[] encrypted2 = AesCrypto.CBCEncrypt(_testBytes, key);
+        byte[] decrypted1 = AesCrypto.CBCDecrypt(encrypted1, key);
+        byte[] decrypted2 = AesCrypto.CBCDecrypt(encrypted2, key);
 
         // Assert
         CollectionAssert.AreNotEqual(encrypted1, encrypted2); // 每次加密结果应该不同（随机IV）
@@ -152,11 +152,11 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncrypt_WithRandomIVAndByteArrayKey_ShouldReturnValidEncryptedData()
     {
         // Arrange
-        (byte[]? keyBytes, byte[] _) = AesCrypto.GenerateAesCBCKey();
+        (byte[]? keyBytes, byte[] _) = AesCrypto.GenerateCBCKey();
 
         // Act
-        byte[] encrypted = AesCrypto.AesCBCEncrypt(_testBytes, keyBytes);
-        byte[] decrypted = AesCrypto.AesCBCDecrypt(encrypted, keyBytes);
+        byte[] encrypted = AesCrypto.CBCEncrypt(_testBytes, keyBytes);
+        byte[] decrypted = AesCrypto.CBCDecrypt(encrypted, keyBytes);
 
         // Assert
         Assert.IsGreaterThan(_testBytes.Length + 16, encrypted.Length); // 应该包含IV
@@ -172,11 +172,11 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncrypt_WithEmptyContent_ShouldThrowArgumentException()
     {
         // Arrange
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
         byte[] emptyContent = [];
 
         // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesCBCEncrypt(emptyContent, key, iv));
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.CBCEncrypt(emptyContent, key, iv));
     }
 
     /// <summary>
@@ -186,10 +186,10 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncrypt_WithNullContent_ShouldThrowArgumentException()
     {
         // Arrange
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
 
         // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesCBCEncrypt(null!, key, iv));
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.CBCEncrypt(null!, key, iv));
     }
 
     /// <summary>
@@ -199,11 +199,11 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncrypt_WithInvalidKeyLength_ShouldThrowArgumentException()
     {
         // Arrange
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
         string invalidKey = Convert.ToBase64String(new byte[10]); // 10字节无效长度
 
         // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesCBCEncrypt(_testBytes, invalidKey, iv));
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.CBCEncrypt(_testBytes, invalidKey, iv));
     }
 
     /// <summary>
@@ -213,11 +213,11 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncrypt_WithInvalidIVLength_ShouldThrowArgumentException()
     {
         // Arrange
-        (string? key, string _) = AesCrypto.GenerateAesCBCStringKey();
+        (string? key, string _) = AesCrypto.GenerateCBCStringKey();
         string invalidIV = Convert.ToBase64String(new byte[10]); // 10字节无效长度
 
         // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesCBCEncrypt(_testBytes, key, invalidIV));
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.CBCEncrypt(_testBytes, key, invalidIV));
     }
 
     /// <summary>
@@ -227,11 +227,11 @@ public partial class AesBytesCryptoTest
     public void AesCBCEncrypt_WithInvalidBase64Key_ShouldThrowFormatException()
     {
         // Arrange
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
         string invalidKey = "InvalidBase64!@#";
 
         // Act & Assert
-        Assert.ThrowsExactly<FormatException>(() => AesCrypto.AesCBCEncrypt(_testBytes, invalidKey, iv));
+        Assert.ThrowsExactly<FormatException>(() => AesCrypto.CBCEncrypt(_testBytes, invalidKey, iv));
     }
     #endregion
     #endregion
@@ -245,7 +245,7 @@ public partial class AesBytesCryptoTest
     public void GenerateAesGCMKey_ShouldReturnValidKey()
     {
         // Act
-        byte[] key = AesCrypto.GenerateAesGCMKey();
+        byte[] key = AesCrypto.GenerateGCMKey();
 
         // Assert
         Assert.IsNotNull(key);
@@ -261,9 +261,9 @@ public partial class AesBytesCryptoTest
     public void GenerateAesGCMKey_WithDifferentSizes_ShouldReturnValidKeys()
     {
         // Act & Assert
-        byte[] key128 = AesCrypto.GenerateAesGCMKey(128);
-        byte[] key192 = AesCrypto.GenerateAesGCMKey(192);
-        byte[] key256 = AesCrypto.GenerateAesGCMKey(256);
+        byte[] key128 = AesCrypto.GenerateGCMKey(128);
+        byte[] key192 = AesCrypto.GenerateGCMKey(192);
+        byte[] key256 = AesCrypto.GenerateGCMKey(256);
 
         Assert.HasCount(16, key128);
         Assert.HasCount(24, key192);
@@ -278,7 +278,7 @@ public partial class AesBytesCryptoTest
     public void GenerateAesGCMKey_WithInvalidSize_ShouldThrowArgumentException()
     {
         // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GenerateAesGCMKey(512));
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GenerateGCMKey(512));
     }
 
     /// <summary>
@@ -289,7 +289,7 @@ public partial class AesBytesCryptoTest
     public void GenerateAesGCMStringKey_ShouldReturnValidBase64Key()
     {
         // Act
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
 
         // Assert
         Assert.IsNotNull(key);
@@ -310,11 +310,11 @@ public partial class AesBytesCryptoTest
     public void AesGCMEncryptDecrypt_WithStringKey_ShouldReturnOriginalContent()
     {
         // Arrange
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
 
         // Act
-        byte[] encrypted = AesCrypto.AesGCMEncrypt(_testBytes, key);
-        byte[] decrypted = AesCrypto.AesGCMDecrypt(encrypted, key);
+        byte[] encrypted = AesCrypto.GCMEncrypt(_testBytes, key);
+        byte[] decrypted = AesCrypto.GCMDecrypt(encrypted, key);
 
         // Assert
         CollectionAssert.AreEqual(_testBytes, decrypted);
@@ -329,11 +329,11 @@ public partial class AesBytesCryptoTest
     public void AesGCMEncryptDecrypt_WithByteArrayKey_ShouldReturnOriginalContent()
     {
         // Arrange
-        byte[] keyBytes = AesCrypto.GenerateAesGCMKey();
+        byte[] keyBytes = AesCrypto.GenerateGCMKey();
 
         // Act
-        byte[] encrypted = AesCrypto.AesGCMEncrypt(_testBytes, keyBytes);
-        byte[] decrypted = AesCrypto.AesGCMDecrypt(encrypted, keyBytes);
+        byte[] encrypted = AesCrypto.GCMEncrypt(_testBytes, keyBytes);
+        byte[] decrypted = AesCrypto.GCMDecrypt(encrypted, keyBytes);
 
         // Assert
         CollectionAssert.AreEqual(_testBytes, decrypted);
@@ -348,8 +348,8 @@ public partial class AesBytesCryptoTest
     public void AesGCMEncryptDecrypt_WithOutKeyAndNonce_ShouldReturnOriginalContent()
     {
         // Act
-        byte[] encrypted = AesCrypto.AesGCMEncrypt(_testBytes, out string key, out string nonce);
-        byte[] decrypted = AesCrypto.AesGCMDecrypt(encrypted, key, nonce);
+        byte[] encrypted = AesCrypto.GCMEncrypt(_testBytes, out string key, out string nonce);
+        byte[] decrypted = AesCrypto.GCMDecrypt(encrypted, key, nonce);
 
         // Assert
         Assert.IsNotNull(key);
@@ -366,8 +366,8 @@ public partial class AesBytesCryptoTest
     public void AesGCMEncrypt_WithSameKeyButDifferentNonce_ShouldReturnDifferentResults()
     {
         // Act
-        byte[] encrypted1 = AesCrypto.AesGCMEncrypt(_testBytes, out _, out _);
-        byte[] encrypted2 = AesCrypto.AesGCMEncrypt(_testBytes, out _, out _);
+        byte[] encrypted1 = AesCrypto.GCMEncrypt(_testBytes, out _, out _);
+        byte[] encrypted2 = AesCrypto.GCMEncrypt(_testBytes, out _, out _);
 
         // Assert
         CollectionAssert.AreNotEqual(encrypted1, encrypted2);
@@ -383,11 +383,11 @@ public partial class AesBytesCryptoTest
     public void AesGCMEncrypt_WithEmptyContent_ShouldThrowArgumentException()
     {
         // Arrange
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
         byte[] emptyContent = [];
 
         // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesGCMEncrypt(emptyContent, key));
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GCMEncrypt(emptyContent, key));
     }
 
     /// <summary>
@@ -400,7 +400,7 @@ public partial class AesBytesCryptoTest
         string invalidKey = Convert.ToBase64String(new byte[10]);
 
         // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesGCMEncrypt(_testBytes, invalidKey));
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GCMEncrypt(_testBytes, invalidKey));
     }
 
     /// <summary>
@@ -411,14 +411,14 @@ public partial class AesBytesCryptoTest
     public void AesGCMDecrypt_WithTamperedData_ShouldThrowAuthenticationTagMismatchException()
     {
         // Arrange
-        string key = AesCrypto.GenerateAesGCMStringKey();
-        byte[] encrypted = AesCrypto.AesGCMEncrypt(_testBytes, key);
+        string key = AesCrypto.GenerateGCMStringKey();
+        byte[] encrypted = AesCrypto.GCMEncrypt(_testBytes, key);
 
         // 篡改数据
         encrypted[0] ^= (byte)1;
 
         // Act & Assert
-        Assert.ThrowsExactly<System.Security.Cryptography.AuthenticationTagMismatchException>(() => AesCrypto.AesGCMDecrypt(encrypted, key));
+        Assert.ThrowsExactly<System.Security.Cryptography.AuthenticationTagMismatchException>(() => AesCrypto.GCMDecrypt(encrypted, key));
     }
 
     /// <summary>
@@ -428,11 +428,11 @@ public partial class AesBytesCryptoTest
     public void AesGCMDecrypt_WithInvalidNonceLength_ShouldThrowArgumentException()
     {
         // Arrange
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
         string invalidNonce = Convert.ToBase64String(new byte[10]);
 
         // Act & Assert
-        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.AesGCMDecrypt(_testBytes, key, invalidNonce));
+        Assert.ThrowsExactly<ArgumentException>(() => AesCrypto.GCMDecrypt(_testBytes, key, invalidNonce));
     }
     #endregion
     #endregion

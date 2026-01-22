@@ -82,19 +82,19 @@ public class AesFileCryptoTest
         File.WriteAllText(inputFile, _testContent, Encoding.UTF8);
 
         // 生成密钥和IV
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
 
         // 加密文件
         FileInfo inputFileInfo = new(inputFile);
         FileInfo encryptedFileInfo = new(encryptedFile);
-        AesCrypto.AesCBCEncryptFile(inputFileInfo, encryptedFileInfo, key, iv);
+        AesCrypto.CBCEncryptFile(inputFileInfo, encryptedFileInfo, key, iv);
 
         Assert.IsTrue(File.Exists(encryptedFile));
         Assert.AreNotEqual(File.ReadAllBytes(inputFile), File.ReadAllBytes(encryptedFile));
 
         // 解密文件
         FileInfo decryptedFileInfo = new(decryptedFile);
-        AesCrypto.AesCBCDecryptFile(encryptedFileInfo, decryptedFileInfo, key, iv);
+        AesCrypto.CBCDecryptFile(encryptedFileInfo, decryptedFileInfo, key, iv);
 
         // 验证解密结果
         Assert.IsTrue(File.Exists(decryptedFile));
@@ -123,16 +123,16 @@ public class AesFileCryptoTest
         File.WriteAllText(inputFile, _testContent, Encoding.UTF8);
 
         // 生成密钥和IV
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
 
         // 加密文件
-        AesCrypto.AesCBCEncryptFileByPath(inputFile, encryptedFile, key, iv);
+        AesCrypto.CBCEncryptFile(inputFile, encryptedFile, key, iv);
 
         Assert.IsTrue(File.Exists(encryptedFile));
         Assert.AreNotEqual(File.ReadAllBytes(inputFile), File.ReadAllBytes(encryptedFile));
 
         // 解密文件
-        AesCrypto.AesCBCDecryptFileByPath(encryptedFile, decryptedFile, key, iv);
+        AesCrypto.CBCDecryptFile(encryptedFile, decryptedFile, key, iv);
 
         // 验证解密结果
         Assert.IsTrue(File.Exists(decryptedFile));
@@ -163,7 +163,7 @@ public class AesFileCryptoTest
         // 加密文件（自动生成密钥和IV）
         FileInfo inputFileInfo = new(inputFile);
         FileInfo encryptedFileInfo = new(encryptedFile);
-        AesCrypto.AesCBCEncryptFile(inputFileInfo, encryptedFileInfo, out string key, out string iv);
+        AesCrypto.CBCEncryptFile(inputFileInfo, encryptedFileInfo, out string key, out string iv);
 
         Assert.IsNotNull(key);
         Assert.IsNotNull(iv);
@@ -171,7 +171,7 @@ public class AesFileCryptoTest
 
         // 解密文件
         FileInfo decryptedFileInfo = new(decryptedFile);
-        AesCrypto.AesCBCDecryptFile(encryptedFileInfo, decryptedFileInfo, key, iv);
+        AesCrypto.CBCDecryptFile(encryptedFileInfo, decryptedFileInfo, key, iv);
 
         // 验证解密结果
         string decryptedContent = File.ReadAllText(decryptedFile, Encoding.UTF8);
@@ -199,12 +199,12 @@ public class AesFileCryptoTest
         File.WriteAllText(inputFile, _testContent, Encoding.UTF8);
 
         // 生成密钥
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
 
         // 加密文件（使用随机IV）
         FileInfo inputFileInfo = new(inputFile);
         FileInfo encryptedFileInfo = new(encryptedFile);
-        AesCrypto.AesCBCEncryptFile(inputFileInfo, encryptedFileInfo, key);
+        AesCrypto.CBCEncryptFile(inputFileInfo, encryptedFileInfo, key);
 
         Assert.IsTrue(File.Exists(encryptedFile));
 
@@ -219,7 +219,7 @@ public class AesFileCryptoTest
 
         // 解密文件（自动提取IV）
         FileInfo decryptedFileInfo = new(decryptedFile);
-        AesCrypto.AesCBCDecryptFile(encryptedFileInfo, decryptedFileInfo, key);
+        AesCrypto.CBCDecryptFile(encryptedFileInfo, decryptedFileInfo, key);
 
         // 验证解密结果
         string decryptedContent = File.ReadAllText(decryptedFile, Encoding.UTF8);
@@ -254,13 +254,13 @@ public class AesFileCryptoTest
         File.WriteAllText(inputFile, largeContent, Encoding.UTF8);
 
         // 生成密钥和IV
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
 
         // 加密文件
-        AesCrypto.AesCBCEncryptFileByPath(inputFile, encryptedFile, key, iv);
+        AesCrypto.CBCEncryptFile(inputFile, encryptedFile, key, iv);
 
         // 解密文件
-        AesCrypto.AesCBCDecryptFileByPath(encryptedFile, decryptedFile, key, iv);
+        AesCrypto.CBCDecryptFile(encryptedFile, decryptedFile, key, iv);
 
         // 验证解密结果
         string decryptedContent = File.ReadAllText(decryptedFile, Encoding.UTF8);
@@ -294,13 +294,13 @@ public class AesFileCryptoTest
         File.WriteAllBytes(inputFile, originalData);
 
         // 生成密钥和IV
-        (string key, string iv) = AesCrypto.GenerateAesCBCStringKey();
+        (string key, string iv) = AesCrypto.GenerateCBCStringKey();
 
         // 加密文件
-        AesCrypto.AesCBCEncryptFileByPath(inputFile, encryptedFile, key, iv);
+        AesCrypto.CBCEncryptFile(inputFile, encryptedFile, key, iv);
 
         // 解密文件
-        AesCrypto.AesCBCDecryptFileByPath(encryptedFile, decryptedFile, key, iv);
+        AesCrypto.CBCDecryptFile(encryptedFile, decryptedFile, key, iv);
 
         // 验证解密结果
         byte[] decryptedData = File.ReadAllBytes(decryptedFile);
@@ -333,19 +333,19 @@ public class AesFileCryptoTest
         File.WriteAllText(inputFile, _testContent, Encoding.UTF8);
 
         // 生成密钥
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
 
         // 加密文件
         FileInfo inputFileInfo = new(inputFile);
         FileInfo encryptedFileInfo = new(encryptedFile);
-        AesCrypto.AesGCMEncryptFile(inputFileInfo, encryptedFileInfo, key);
+        AesCrypto.GCMEncryptFile(inputFileInfo, encryptedFileInfo, key);
 
         Assert.IsTrue(File.Exists(encryptedFile));
         Assert.AreNotEqual(File.ReadAllBytes(inputFile), File.ReadAllBytes(encryptedFile));
 
         // 解密文件
         FileInfo decryptedFileInfo = new(decryptedFile);
-        AesCrypto.AesGCMDecryptFile(encryptedFileInfo, decryptedFileInfo, key);
+        AesCrypto.GCMDecryptFile(encryptedFileInfo, decryptedFileInfo, key);
 
         // 验证解密结果
         Assert.IsTrue(File.Exists(decryptedFile));
@@ -374,15 +374,15 @@ public class AesFileCryptoTest
         File.WriteAllText(inputFile, _testContent, Encoding.UTF8);
 
         // 生成密钥
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
 
         // 加密文件
-        AesCrypto.AesGCMEncryptFileByPath(inputFile, encryptedFile, key);
+        AesCrypto.GCMEncryptFile(inputFile, encryptedFile, key);
 
         Assert.IsTrue(File.Exists(encryptedFile));
 
         // 解密文件
-        AesCrypto.AesGCMDecryptFileByPath(encryptedFile, decryptedFile, key);
+        AesCrypto.GCMDecryptFile(encryptedFile, decryptedFile, key);
 
         // 验证解密结果
         string decryptedContent = File.ReadAllText(decryptedFile, Encoding.UTF8);
@@ -412,7 +412,7 @@ public class AesFileCryptoTest
         // 加密文件（自动生成密钥和nonce）
         FileInfo inputFileInfo = new(inputFile);
         FileInfo encryptedFileInfo = new(encryptedFile);
-        AesCrypto.AesGCMEncryptFile(inputFileInfo, encryptedFileInfo, out string key, out string nonce);
+        AesCrypto.GCMEncryptFile(inputFileInfo, encryptedFileInfo, out string key, out string nonce);
 
         Assert.IsNotNull(key);
         Assert.IsNotNull(nonce);
@@ -420,7 +420,7 @@ public class AesFileCryptoTest
 
         // 解密文件（使用单独的nonce）
         FileInfo decryptedFileInfo = new(decryptedFile);
-        AesCrypto.AesGCMDecryptFile(encryptedFileInfo, decryptedFileInfo, key, nonce);
+        AesCrypto.GCMDecryptFile(encryptedFileInfo, decryptedFileInfo, key, nonce);
 
         // 验证解密结果
         string decryptedContent = File.ReadAllText(decryptedFile, Encoding.UTF8);
@@ -452,10 +452,10 @@ public class AesFileCryptoTest
         RandomNumberGenerator.Fill(nonceBytes);
 
         // 加密文件（使用单独的nonce）
-        AesCrypto.AesGCMEncryptFileByPath(inputFile, encryptedFile, out string generatedKey, out string generatedNonce);
+        AesCrypto.GCMEncryptFile(inputFile, encryptedFile, out string generatedKey, out string generatedNonce);
 
         // 解密文件（使用生成的nonce）
-        AesCrypto.AesGCMDecryptFileByPath(encryptedFile, decryptedFile, generatedKey, generatedNonce);
+        AesCrypto.GCMDecryptFile(encryptedFile, decryptedFile, generatedKey, generatedNonce);
 
         // 验证解密结果
         string decryptedContent = File.ReadAllText(decryptedFile, Encoding.UTF8);
@@ -503,13 +503,13 @@ public class AesFileCryptoTest
         GC.WaitForPendingFinalizers();
 
         // 生成密钥
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
 
         // 加密文件
-        AesCrypto.AesGCMEncryptFileByPath(inputFile, encryptedFile, key);
+        AesCrypto.GCMEncryptFile(inputFile, encryptedFile, key);
 
         // 解密文件
-        AesCrypto.AesGCMDecryptFileByPath(encryptedFile, decryptedFile, key);
+        AesCrypto.GCMDecryptFile(encryptedFile, decryptedFile, key);
 
         // 验证解密结果
         string decryptedContent = File.ReadAllText(decryptedFile, Encoding.UTF8);
@@ -540,10 +540,10 @@ public class AesFileCryptoTest
         File.WriteAllText(inputFile, _testContent, Encoding.UTF8);
 
         // 生成密钥
-        string key = AesCrypto.GenerateAesGCMStringKey();
+        string key = AesCrypto.GenerateGCMStringKey();
 
         // 加密文件
-        AesCrypto.AesGCMEncryptFileByPath(inputFile, encryptedFile, key);
+        AesCrypto.GCMEncryptFile(inputFile, encryptedFile, key);
 
         // 篡改加密文件（修改中间的一个字节）
         byte[] encryptedData = File.ReadAllBytes(encryptedFile);
@@ -552,7 +552,7 @@ public class AesFileCryptoTest
 
         // 尝试解密（应该抛出异常）
         Assert.ThrowsExactly<AuthenticationTagMismatchException>(() =>
-            AesCrypto.AesGCMDecryptFileByPath(encryptedFile, decryptedFile, key));
+            AesCrypto.GCMDecryptFile(encryptedFile, decryptedFile, key));
     }
 
     #endregion
@@ -574,7 +574,7 @@ public class AesFileCryptoTest
         }
 
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptFileByPath("", "output.bin", "key", "iv"));
+            AesCrypto.CBCEncryptFile("", "output.bin", "key", "iv"));
     }
 
     /// <summary>
@@ -594,7 +594,7 @@ public class AesFileCryptoTest
         string outputFile = Path.Combine(_testDirectory, "output.bin");
 
         Assert.ThrowsExactly<FileNotFoundException>(() =>
-            AesCrypto.AesCBCEncryptFileByPath(inputFile, outputFile, "key", "iv"));
+            AesCrypto.CBCEncryptFile(inputFile, outputFile, "key", "iv"));
     }
 
     /// <summary>
@@ -616,7 +616,7 @@ public class AesFileCryptoTest
         File.WriteAllText(inputFile, "test");
 
         Assert.ThrowsExactly<FormatException>(() =>
-            AesCrypto.AesCBCEncryptFileByPath(inputFile, outputFile, "invalid_key", "invalid_iv"));
+            AesCrypto.CBCEncryptFile(inputFile, outputFile, "invalid_key", "invalid_iv"));
     }
     #endregion
 }

@@ -17,7 +17,7 @@ public static partial class AesCrypto
     /// IV长度：128位（16字节）
     /// 注意：每次调用都会生成新的随机密钥和IV
     /// </remarks>
-    public static (byte[] key, byte[] iv) GenerateAesCBCKey()
+    public static (byte[] key, byte[] iv) GenerateCBCKey()
     {
         using Aes aes = Aes.Create();
         aes.GenerateKey();
@@ -34,9 +34,9 @@ public static partial class AesCrypto
     /// IV长度：128位（16字节）
     /// 注意：每次调用都会生成新的随机密钥和IV
     /// </remarks>
-    public static (string key, string iv) GenerateAesCBCStringKey()
+    public static (string key, string iv) GenerateCBCStringKey()
     {
-        (byte[] keyBytes, byte[] ivBytes) = GenerateAesCBCKey();
+        (byte[] keyBytes, byte[] ivBytes) = GenerateCBCKey();
         string key = Convert.ToBase64String(keyBytes);
         string iv = Convert.ToBase64String(ivBytes);
         return (key, iv);
@@ -56,11 +56,11 @@ public static partial class AesCrypto
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, string key, string iv)
+    public static byte[] CBCEncrypt(byte[] content, string key, string iv)
     {
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] ivBytes = Convert.FromBase64String(iv);
-        return AesCBCEncrypt(content, keyBytes, ivBytes);
+        return CBCEncrypt(content, keyBytes, ivBytes);
     }
 
     /// <summary>
@@ -77,17 +77,17 @@ public static partial class AesCrypto
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, byte[] keyBytes, byte[] ivBytes)
+    public static byte[] CBCEncrypt(byte[] content, byte[] keyBytes, byte[] ivBytes)
     {
         if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (ivBytes is null || ivBytes.Length == 0) throw new ArgumentException("初始化向量不能为空", nameof(ivBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）", nameof(keyBytes));
         if (ivBytes.Length != 16) throw new ArgumentException("IV长度必须为16字节", nameof(ivBytes));
-        
+
         using MemoryStream inputStream = new(content);
         using MemoryStream outputStream = new();
-        AesCBCEncryptStream(inputStream, outputStream, keyBytes, ivBytes);
+        CBCEncrypt(inputStream, outputStream, keyBytes, ivBytes);
         return outputStream.ToArray();
     }
 
@@ -101,11 +101,11 @@ public static partial class AesCrypto
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
-    public static byte[] AesCBCDecrypt(byte[] content, string key, string iv)
+    public static byte[] CBCDecrypt(byte[] content, string key, string iv)
     {
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] ivBytes = Convert.FromBase64String(iv);
-        return AesCBCDecrypt(content, keyBytes, ivBytes);
+        return CBCDecrypt(content, keyBytes, ivBytes);
     }
 
     /// <summary>
@@ -118,17 +118,17 @@ public static partial class AesCrypto
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
-    public static byte[] AesCBCDecrypt(byte[] content, byte[] keyBytes, byte[] ivBytes)
+    public static byte[] CBCDecrypt(byte[] content, byte[] keyBytes, byte[] ivBytes)
     {
         if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (ivBytes is null || ivBytes.Length == 0) throw new ArgumentException("初始化向量不能为空", nameof(ivBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）", nameof(keyBytes));
         if (ivBytes.Length != 16) throw new ArgumentException("IV长度必须为16字节", nameof(ivBytes));
-        
+
         using MemoryStream inputStream = new(content);
         using MemoryStream outputStream = new();
-        AesCBCDecryptStream(inputStream, outputStream, keyBytes, ivBytes);
+        CBCDecrypt(inputStream, outputStream, keyBytes, ivBytes);
         return outputStream.ToArray();
     }
 
@@ -143,10 +143,10 @@ public static partial class AesCrypto
     /// 此方法会生成新的随机密钥和IV，适用于需要生成密钥的场景。
     /// 请妥善保存输出的密钥和IV，解密时需要使用相同的密钥和IV。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, out string key, out string iv)
+    public static byte[] CBCEncrypt(byte[] content, out string key, out string iv)
     {
-        (key, iv) = GenerateAesCBCStringKey();
-        return AesCBCEncrypt(content, key, iv);
+        (key, iv) = GenerateCBCStringKey();
+        return CBCEncrypt(content, key, iv);
     }
 
     /// <summary>
@@ -163,10 +163,10 @@ public static partial class AesCrypto
     /// IV（16字节）会被前置到加密数据前，解密时自动提取。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, string key)
+    public static byte[] CBCEncrypt(byte[] content, string key)
     {
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesCBCEncrypt(content, keyBytes);
+        return CBCEncrypt(content, keyBytes);
     }
 
     /// <summary>
@@ -183,27 +183,27 @@ public static partial class AesCrypto
     /// IV（16字节）会被前置到加密数据前，解密时自动提取。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static byte[] AesCBCEncrypt(byte[] content, byte[] keyBytes)
+    public static byte[] CBCEncrypt(byte[] content, byte[] keyBytes)
     {
         if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）", nameof(keyBytes));
-        
+
         using MemoryStream inputStream = new(content);
         using MemoryStream outputStream = new();
-        
+
         // 生成随机IV并写入输出流
         using Aes aes = Aes.Create();
         aes.Key = keyBytes;
         aes.GenerateIV();
         outputStream.Write(aes.IV, 0, aes.IV.Length);
-        
+
         // 加密剩余数据
         outputStream.Position = aes.IV.Length;
         using CryptoStream cryptoStream = new(outputStream, aes.CreateEncryptor(), CryptoStreamMode.Write);
         inputStream.CopyTo(cryptoStream);
         cryptoStream.FlushFinalBlock();
-        
+
         return outputStream.ToArray();
     }
 
@@ -221,10 +221,10 @@ public static partial class AesCrypto
     /// 会自动从前16字节提取IV进行解密。
     /// 与 AesCBCEncrypt(content, key) 方法配对使用。
     /// </remarks>
-    public static byte[] AesCBCDecrypt(byte[] content, string key)
+    public static byte[] CBCDecrypt(byte[] content, string key)
     {
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesCBCDecrypt(content, keyBytes);
+        return CBCDecrypt(content, keyBytes);
     }
 
     /// <summary>
@@ -241,20 +241,20 @@ public static partial class AesCrypto
     /// 会自动从前16字节提取IV进行解密。
     /// 与 AesCBCEncrypt(content, key) 方法配对使用。
     /// </remarks>
-    public static byte[] AesCBCDecrypt(byte[] content, byte[] keyBytes)
+    public static byte[] CBCDecrypt(byte[] content, byte[] keyBytes)
     {
         if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）", nameof(keyBytes));
-        
+
         using MemoryStream inputStream = new(content);
         using MemoryStream outputStream = new();
-        
+
         // 读取IV
         byte[] ivBytes = new byte[16];
         int bytesRead = inputStream.Read(ivBytes, 0, ivBytes.Length);
         if (bytesRead != 16) throw new ArgumentException("数据长度不足，无法提取IV");
-        
+
         // 解密剩余数据
         using Aes aes = Aes.Create();
         aes.Key = keyBytes;
@@ -263,7 +263,7 @@ public static partial class AesCrypto
         aes.Padding = PaddingMode.PKCS7;
         using CryptoStream cryptoStream = new(inputStream, aes.CreateDecryptor(), CryptoStreamMode.Read);
         cryptoStream.CopyTo(outputStream);
-        
+
         return outputStream.ToArray();
     }
     #endregion
@@ -277,12 +277,12 @@ public static partial class AesCrypto
     /// <summary>
     /// GCM认证标签大小（128位）
     /// </summary>
-    public const int AesGcmTagSize = 16;
+    public const int GCMTagSize = 16;
 
     /// <summary>
     /// GCM推荐nonce大小（96位）
     /// </summary>
-    public const int AesGcmNonceSize = 12;
+    public const int GCMNonceSize = 12;
 
     /// <summary>
     /// 生成Aes-GCM密钥
@@ -295,7 +295,7 @@ public static partial class AesCrypto
     /// 推荐使用256位密钥以获得更高的安全性。
     /// 生成的密钥是随机的，请妥善保存。
     /// </remarks>
-    public static byte[] GenerateAesGCMKey(int keySize = 256)
+    public static byte[] GenerateGCMKey(int keySize = 256)
     {
         if (keySize != 128 && keySize != 192 && keySize != 256) throw new ArgumentException("密钥大小必须是128、192或256位");
         using Aes aes = Aes.Create();
@@ -315,9 +315,9 @@ public static partial class AesCrypto
     /// 推荐使用256位密钥以获得更高的安全性。
     /// 生成的密钥是随机的，请妥善保存。
     /// </remarks>
-    public static string GenerateAesGCMStringKey(int keySize = 256)
+    public static string GenerateGCMStringKey(int keySize = 256)
     {
-        byte[] keyBytes = GenerateAesGCMKey(keySize);
+        byte[] keyBytes = GenerateGCMKey(keySize);
         string key = Convert.ToBase64String(keyBytes);
         return key;
     }
@@ -339,10 +339,10 @@ public static partial class AesCrypto
     /// - ciphertext: 加密后的数据
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static byte[] AesGCMEncrypt(byte[] content, string key)
+    public static byte[] GCMEncrypt(byte[] content, string key)
     {
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesGCMEncrypt(content, keyBytes);
+        return GCMEncrypt(content, keyBytes);
     }
 
     /// <summary>
@@ -363,16 +363,16 @@ public static partial class AesCrypto
     /// nonce通过out参数单独返回，请妥善保存输出的密钥和nonce，解密时需要使用相同的密钥和nonce。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static byte[] AesGCMEncrypt(byte[] content, out string key, out string nonce)
+    public static byte[] GCMEncrypt(byte[] content, out string key, out string nonce)
     {
         if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
-        key = GenerateAesGCMStringKey();
+        key = GenerateGCMStringKey();
         byte[] keyBytes = Convert.FromBase64String(key);
-        byte[] nonceBytes = new byte[AesGcmNonceSize];
+        byte[] nonceBytes = new byte[GCMNonceSize];
         RandomNumberGenerator.Fill(nonceBytes);
         nonce = Convert.ToBase64String(nonceBytes);
-        
-        (byte[] tag, byte[] ciphertext) = AesGCMEncryptCore(content, keyBytes, nonceBytes);
+
+        (byte[] tag, byte[] ciphertext) = GCMEncryptCore(content, keyBytes, nonceBytes);
         byte[] result = new byte[tag.Length + ciphertext.Length];
         Buffer.BlockCopy(tag, 0, result, 0, tag.Length);
         Buffer.BlockCopy(ciphertext, 0, result, tag.Length, ciphertext.Length);
@@ -396,14 +396,14 @@ public static partial class AesCrypto
     /// - ciphertext: 加密后的数据
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static byte[] AesGCMEncrypt(byte[] content, byte[] keyBytes)
+    public static byte[] GCMEncrypt(byte[] content, byte[] keyBytes)
     {
         if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）");
-        byte[] nonce = new byte[AesGcmNonceSize];
+        byte[] nonce = new byte[GCMNonceSize];
         RandomNumberGenerator.Fill(nonce);
-        (byte[] tag, byte[] ciphertext) = AesGCMEncryptCore(content, keyBytes, nonce);
+        (byte[] tag, byte[] ciphertext) = GCMEncryptCore(content, keyBytes, nonce);
         byte[] result = new byte[nonce.Length + tag.Length + ciphertext.Length];
         Buffer.BlockCopy(nonce, 0, result, 0, nonce.Length);
         Buffer.BlockCopy(tag, 0, result, nonce.Length, tag.Length);
@@ -418,11 +418,11 @@ public static partial class AesCrypto
     /// <param name="keyBytes">密钥字节数组</param>
     /// <param name="nonce">随机数（12字节）</param>
     /// <returns>加密后的(tag, ciphertext)元组</returns>
-    private static (byte[] tag, byte[] ciphertext) AesGCMEncryptCore(byte[] content, byte[] keyBytes, byte[] nonce)
+    private static (byte[] tag, byte[] ciphertext) GCMEncryptCore(byte[] content, byte[] keyBytes, byte[] nonce)
     {
         byte[] ciphertext = new byte[content.Length];
-        byte[] tag = new byte[AesGcmTagSize];
-        using AesGcm aesGcm = new(keyBytes, AesGcmTagSize);
+        byte[] tag = new byte[GCMTagSize];
+        using AesGcm aesGcm = new(keyBytes, GCMTagSize);
         aesGcm.Encrypt(nonce, content, ciphertext, tag);
         return (tag, ciphertext);
     }
@@ -441,10 +441,10 @@ public static partial class AesCrypto
     /// 解密时会自动验证认证标签，如果数据被篡改会抛出异常。
     /// 与 AesGCMEncrypt 方法配对使用。
     /// </remarks>
-    public static byte[] AesGCMDecrypt(byte[] content, string key)
+    public static byte[] GCMDecrypt(byte[] content, string key)
     {
         byte[] keyBytes = Convert.FromBase64String(key);
-        return AesGCMDecrypt(content, keyBytes);
+        return GCMDecrypt(content, keyBytes);
     }
 
     /// <summary>
@@ -461,17 +461,17 @@ public static partial class AesCrypto
     /// 解密时会自动验证认证标签，如果数据被篡改会抛出异常。
     /// 与 AesGCMEncrypt 方法配对使用。
     /// </remarks>
-    public static byte[] AesGCMDecrypt(byte[] content, byte[] keyBytes)
+    public static byte[] GCMDecrypt(byte[] content, byte[] keyBytes)
     {
         if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）");
-        if (content.Length < AesGcmNonceSize + AesGcmTagSize) throw new ArgumentException("数据长度不足，无法提取nonce和tag");
-        byte[] nonce = new byte[AesGcmNonceSize];
-        byte[] tagAndCiphertext = new byte[content.Length - AesGcmNonceSize];
-        Buffer.BlockCopy(content, 0, nonce, 0, AesGcmNonceSize);
-        Buffer.BlockCopy(content, AesGcmNonceSize, tagAndCiphertext, 0, tagAndCiphertext.Length);
-        return AesGCMDecrypt(tagAndCiphertext, keyBytes, nonce);
+        if (content.Length < GCMNonceSize + GCMTagSize) throw new ArgumentException("数据长度不足，无法提取nonce和tag");
+        byte[] nonce = new byte[GCMNonceSize];
+        byte[] tagAndCiphertext = new byte[content.Length - GCMNonceSize];
+        Buffer.BlockCopy(content, 0, nonce, 0, GCMNonceSize);
+        Buffer.BlockCopy(content, GCMNonceSize, tagAndCiphertext, 0, tagAndCiphertext.Length);
+        return GCMDecrypt(tagAndCiphertext, keyBytes, nonce);
     }
 
     /// <summary>
@@ -492,11 +492,11 @@ public static partial class AesCrypto
     /// nonce作为单独参数传入，解密时会自动验证认证标签，如果数据被篡改会抛出异常。
     /// 与 AesGCMEncrypt(content, out key, out nonce) 方法配对使用。
     /// </remarks>
-    public static byte[] AesGCMDecrypt(byte[] content, string key, string nonce)
+    public static byte[] GCMDecrypt(byte[] content, string key, string nonce)
     {
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] nonceBytes = Convert.FromBase64String(nonce);
-        return AesGCMDecrypt(content, keyBytes, nonceBytes);
+        return GCMDecrypt(content, keyBytes, nonceBytes);
     }
 
     /// <summary>
@@ -516,20 +516,20 @@ public static partial class AesCrypto
     /// nonce作为单独参数传入，解密时会自动验证认证标签，如果数据被篡改会抛出异常。
     /// 与 AesGCMEncrypt(content, out key, out nonce) 方法配对使用。
     /// </remarks>
-    public static byte[] AesGCMDecrypt(byte[] content, byte[] keyBytes, byte[] nonceBytes)
+    public static byte[] GCMDecrypt(byte[] content, byte[] keyBytes, byte[] nonceBytes)
     {
         if (content is null || content.Length == 0) throw new ArgumentException("内容不能为空", nameof(content));
         if (keyBytes is null || keyBytes.Length == 0) throw new ArgumentException("密钥不能为空", nameof(keyBytes));
         if (nonceBytes is null || nonceBytes.Length == 0) throw new ArgumentException("nonce不能为空", nameof(nonceBytes));
         if (keyBytes.Length != 16 && keyBytes.Length != 24 && keyBytes.Length != 32) throw new ArgumentException("密钥长度无效，必须是16、24或32字节（对应Aes-128、Aes-192、Aes-256）");
-        if (nonceBytes.Length != AesGcmNonceSize) throw new ArgumentException($"nonce长度必须为{AesGcmNonceSize}字节", nameof(nonceBytes));
-        if (content.Length < AesGcmTagSize) throw new ArgumentException("数据长度不足，无法提取tag");
-        byte[] tag = new byte[AesGcmTagSize];
-        byte[] ciphertext = new byte[content.Length - AesGcmTagSize];
-        Buffer.BlockCopy(content, 0, tag, 0, AesGcmTagSize);
-        Buffer.BlockCopy(content, AesGcmTagSize, ciphertext, 0, ciphertext.Length);
+        if (nonceBytes.Length != GCMNonceSize) throw new ArgumentException($"nonce长度必须为{GCMNonceSize}字节", nameof(nonceBytes));
+        if (content.Length < GCMTagSize) throw new ArgumentException("数据长度不足，无法提取tag");
+        byte[] tag = new byte[GCMTagSize];
+        byte[] ciphertext = new byte[content.Length - GCMTagSize];
+        Buffer.BlockCopy(content, 0, tag, 0, GCMTagSize);
+        Buffer.BlockCopy(content, GCMTagSize, ciphertext, 0, ciphertext.Length);
         byte[] plaintext = new byte[ciphertext.Length];
-        using AesGcm aesGcm = new(keyBytes, AesGcmTagSize);
+        using AesGcm aesGcm = new(keyBytes, GCMTagSize);
         aesGcm.Decrypt(nonceBytes, ciphertext, tag, plaintext);
         return plaintext;
     }

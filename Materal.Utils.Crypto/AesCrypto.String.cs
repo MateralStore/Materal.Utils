@@ -24,12 +24,12 @@ public static partial class AesCrypto
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static string AesCBCEncryptString(string content, string key, string iv, Encoding? encoding = null)
+    public static string CBCEncrypt(string content, string key, string iv, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = encoding.GetBytes(content);
-        byte[] encryptedBytes = AesCBCEncrypt(contentBytes, key, iv);
+        byte[] encryptedBytes = CBCEncrypt(contentBytes, key, iv);
         return Convert.ToBase64String(encryptedBytes);
     }
 
@@ -44,12 +44,12 @@ public static partial class AesCrypto
     /// <exception cref="ArgumentException">当参数为空或无效时抛出</exception>
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
-    public static string AesCBCDecryptString(string content, string key, string iv, Encoding? encoding = null)
+    public static string CBCDecrypt(string content, string key, string iv, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = Convert.FromBase64String(content);
-        byte[] decryptedBytes = AesCBCDecrypt(contentBytes, key, iv);
+        byte[] decryptedBytes = CBCDecrypt(contentBytes, key, iv);
         return encoding.GetString(decryptedBytes);
     }
 
@@ -65,12 +65,12 @@ public static partial class AesCrypto
     /// 此方法会生成新的随机密钥和IV，适用于需要生成密钥的场景。
     /// 请妥善保存输出的密钥和IV，解密时需要使用相同的密钥和IV。
     /// </remarks>
-    public static string AesCBCEncryptString(string content, out string key, out string iv, Encoding? encoding = null)
+    public static string CBCEncrypt(string content, out string key, out string iv, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = encoding.GetBytes(content);
-        byte[] encryptedBytes = AesCBCEncrypt(contentBytes, out key, out iv);
+        byte[] encryptedBytes = CBCEncrypt(contentBytes, out key, out iv);
         return Convert.ToBase64String(encryptedBytes);
     }
 
@@ -89,12 +89,12 @@ public static partial class AesCrypto
     /// IV（16字节）会被前置到加密数据前，解密时自动提取。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static string AesCBCEncryptString(string content, string key, Encoding? encoding = null)
+    public static string CBCEncrypt(string content, string key, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = encoding.GetBytes(content);
-        byte[] encryptedBytes = AesCBCEncrypt(contentBytes, key);
+        byte[] encryptedBytes = CBCEncrypt(contentBytes, key);
         return Convert.ToBase64String(encryptedBytes);
     }
 
@@ -111,14 +111,14 @@ public static partial class AesCrypto
     /// <remarks>
     /// 输入格式：Base64(IV + 加密数据)
     /// 会自动从前16字节提取IV进行解密。
-    /// 与 AesCBCEncryptString(content, key) 方法配对使用。
+    /// 与 AesCBCEncrypt(content, key) 方法配对使用。
     /// </remarks>
-    public static string AesCBCDecryptString(string content, string key, Encoding? encoding = null)
+    public static string CBCDecrypt(string content, string key, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = Convert.FromBase64String(content);
-        byte[] decryptedBytes = AesCBCDecrypt(contentBytes, key);
+        byte[] decryptedBytes = CBCDecrypt(contentBytes, key);
         return encoding.GetString(decryptedBytes);
     }
     #endregion
@@ -143,12 +143,12 @@ public static partial class AesCrypto
     /// - ciphertext: 加密后的数据
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static string AesGCMEncryptString(string content, string key, Encoding? encoding = null)
+    public static string GCMEncrypt(string content, string key, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = encoding.GetBytes(content);
-        byte[] encryptedBytes = AesGCMEncrypt(contentBytes, key);
+        byte[] encryptedBytes = GCMEncrypt(contentBytes, key);
         return Convert.ToBase64String(encryptedBytes);
     }
 
@@ -171,12 +171,12 @@ public static partial class AesCrypto
     /// nonce通过out参数单独返回，请妥善保存输出的密钥和nonce，解密时需要使用相同的密钥和nonce。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static string AesGCMEncryptString(string content, out string key, out string nonce, Encoding? encoding = null)
+    public static string GCMEncrypt(string content, out string key, out string nonce, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = encoding.GetBytes(content);
-        byte[] encryptedBytes = AesGCMEncrypt(contentBytes, out key, out nonce);
+        byte[] encryptedBytes = GCMEncrypt(contentBytes, out key, out nonce);
         return Convert.ToBase64String(encryptedBytes);
     }
 
@@ -195,12 +195,12 @@ public static partial class AesCrypto
     /// 解密时会自动验证认证标签，如果数据被篡改会抛出异常。
     /// 与 AesGCMEncryptString 方法配对使用。
     /// </remarks>
-    public static string AesGCMDecryptString(string content, string key, Encoding? encoding = null)
+    public static string GCMDecrypt(string content, string key, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = Convert.FromBase64String(content);
-        byte[] decryptedBytes = AesGCMDecrypt(contentBytes, key);
+        byte[] decryptedBytes = GCMDecrypt(contentBytes, key);
         return encoding.GetString(decryptedBytes);
     }
 
@@ -221,14 +221,14 @@ public static partial class AesCrypto
     /// - tag: 16字节（认证标签）
     /// - ciphertext: 加密后的数据
     /// nonce作为单独参数传入，解密时会自动验证认证标签，如果数据被篡改会抛出异常。
-    /// 与 AesGCMEncryptString(content, out key, out nonce) 方法配对使用。
+    /// 与 AesGCMEncrypt(content, out key, out nonce) 方法配对使用。
     /// </remarks>
-    public static string AesGCMDecryptString(string content, string key, string nonce, Encoding? encoding = null)
+    public static string GCMDecrypt(string content, string key, string nonce, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         if (string.IsNullOrEmpty(content)) throw new ArgumentException("内容不能为空", nameof(content));
         byte[] contentBytes = Convert.FromBase64String(content);
-        byte[] decryptedBytes = AesGCMDecrypt(contentBytes, key, nonce);
+        byte[] decryptedBytes = GCMDecrypt(contentBytes, key, nonce);
         return encoding.GetString(decryptedBytes);
     }
     #endregion

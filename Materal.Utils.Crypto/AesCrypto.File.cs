@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 
 namespace Materal.Utils.Crypto;
 
@@ -24,17 +23,17 @@ public static partial class AesCrypto
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static void AesCBCEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key, string iv)
+    public static void CBCEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key, string iv)
     {
         if (inputFileInfo is null) throw new ArgumentNullException(nameof(inputFileInfo));
         if (outputFileInfo is null) throw new ArgumentNullException(nameof(outputFileInfo));
         if (!inputFileInfo.Exists) throw new FileNotFoundException($"输入文件不存在: {inputFileInfo.FullName}");
-        
+
         using FileStream inputStream = inputFileInfo.OpenRead();
         using FileStream outputStream = outputFileInfo.Create();
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] ivBytes = Convert.FromBase64String(iv);
-        AesCBCEncryptStream(inputStream, outputStream, keyBytes, ivBytes);
+        CBCEncrypt(inputStream, outputStream, keyBytes, ivBytes);
     }
 
     /// <summary>
@@ -52,14 +51,14 @@ public static partial class AesCrypto
     /// 安全警告：CBC模式下，相同的密钥和IV不应重复使用，这会降低安全性。
     /// 推荐每次加密都使用新的随机IV，或使用自动生成IV的重载方法。
     /// </remarks>
-    public static void AesCBCEncryptFileByPath(string inputFilePath, string outputFilePath, string key, string iv)
+    public static void CBCEncryptFile(string inputFilePath, string outputFilePath, string key, string iv)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesCBCEncryptFile(inputFileInfo, outputFileInfo, key, iv);
+        CBCEncryptFile(inputFileInfo, outputFileInfo, key, iv);
     }
 
     /// <summary>
@@ -73,17 +72,17 @@ public static partial class AesCrypto
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <exception cref="FileNotFoundException">输入文件不存在时抛出</exception>
-    public static void AesCBCDecryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key, string iv)
+    public static void CBCDecryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key, string iv)
     {
         if (inputFileInfo is null) throw new ArgumentNullException(nameof(inputFileInfo));
         if (outputFileInfo is null) throw new ArgumentNullException(nameof(outputFileInfo));
         if (!inputFileInfo.Exists) throw new FileNotFoundException($"输入文件不存在: {inputFileInfo.FullName}");
-        
+
         using FileStream inputStream = inputFileInfo.OpenRead();
         using FileStream outputStream = outputFileInfo.Create();
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] ivBytes = Convert.FromBase64String(iv);
-        AesCBCDecryptStream(inputStream, outputStream, keyBytes, ivBytes);
+        CBCDecrypt(inputStream, outputStream, keyBytes, ivBytes);
     }
 
     /// <summary>
@@ -97,14 +96,14 @@ public static partial class AesCrypto
     /// <exception cref="CryptographicException">解密失败时抛出</exception>
     /// <exception cref="FormatException">当Base64编码无效时抛出</exception>
     /// <exception cref="FileNotFoundException">输入文件不存在时抛出</exception>
-    public static void AesCBCDecryptFileByPath(string inputFilePath, string outputFilePath, string key, string iv)
+    public static void CBCDecryptFile(string inputFilePath, string outputFilePath, string key, string iv)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesCBCDecryptFile(inputFileInfo, outputFileInfo, key, iv);
+        CBCDecryptFile(inputFileInfo, outputFileInfo, key, iv);
     }
 
     /// <summary>
@@ -121,10 +120,10 @@ public static partial class AesCrypto
     /// 此方法会生成新的随机密钥和IV，适用于需要生成密钥的场景。
     /// 请妥善保存输出的密钥和IV，解密时需要使用相同的密钥和IV。
     /// </remarks>
-    public static void AesCBCEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, out string key, out string iv)
+    public static void CBCEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, out string key, out string iv)
     {
-        (key, iv) = GenerateAesCBCStringKey();
-        AesCBCEncryptFile(inputFileInfo, outputFileInfo, key, iv);
+        (key, iv) = GenerateCBCStringKey();
+        CBCEncryptFile(inputFileInfo, outputFileInfo, key, iv);
     }
 
     /// <summary>
@@ -141,14 +140,14 @@ public static partial class AesCrypto
     /// 此方法会生成新的随机密钥和IV，适用于需要生成密钥的场景。
     /// 请妥善保存输出的密钥和IV，解密时需要使用相同的密钥和IV。
     /// </remarks>
-    public static void AesCBCEncryptFileByPath(string inputFilePath, string outputFilePath, out string key, out string iv)
+    public static void CBCEncryptFile(string inputFilePath, string outputFilePath, out string key, out string iv)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesCBCEncryptFile(inputFileInfo, outputFileInfo, out key, out iv);
+        CBCEncryptFile(inputFileInfo, outputFileInfo, out key, out iv);
     }
 
     /// <summary>
@@ -166,22 +165,22 @@ public static partial class AesCrypto
     /// IV（16字节）会被前置到加密数据前，解密时自动提取。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static void AesCBCEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key)
+    public static void CBCEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key)
     {
         if (inputFileInfo is null) throw new ArgumentNullException(nameof(inputFileInfo));
         if (outputFileInfo is null) throw new ArgumentNullException(nameof(outputFileInfo));
         if (!inputFileInfo.Exists) throw new FileNotFoundException($"输入文件不存在: {inputFileInfo.FullName}");
-        
+
         using FileStream inputStream = inputFileInfo.OpenRead();
         using FileStream outputStream = outputFileInfo.Create();
         byte[] keyBytes = Convert.FromBase64String(key);
-        
+
         // 生成随机IV并写入输出流
         using Aes aes = Aes.Create();
         aes.Key = keyBytes;
         aes.GenerateIV();
         outputStream.Write(aes.IV, 0, aes.IV.Length);
-        
+
         // 加密剩余数据
         using CryptoStream cryptoStream = new(outputStream, aes.CreateEncryptor(), CryptoStreamMode.Write);
         inputStream.CopyTo(cryptoStream);
@@ -203,14 +202,14 @@ public static partial class AesCrypto
     /// IV（16字节）会被前置到加密数据前，解密时自动提取。
     /// 这种方式避免了单独管理IV的麻烦，推荐在大多数场景中使用。
     /// </remarks>
-    public static void AesCBCEncryptFileByPath(string inputFilePath, string outputFilePath, string key)
+    public static void CBCEncryptFile(string inputFilePath, string outputFilePath, string key)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesCBCEncryptFile(inputFileInfo, outputFileInfo, key);
+        CBCEncryptFile(inputFileInfo, outputFileInfo, key);
     }
 
     /// <summary>
@@ -228,21 +227,21 @@ public static partial class AesCrypto
     /// 会自动从前16字节提取IV进行解密。
     /// 与 AesCBCEncryptFile(inputFileInfo, outputFileInfo, key) 方法配对使用。
     /// </remarks>
-    public static void AesCBCDecryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key)
+    public static void CBCDecryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key)
     {
         if (inputFileInfo is null) throw new ArgumentNullException(nameof(inputFileInfo));
         if (outputFileInfo is null) throw new ArgumentNullException(nameof(outputFileInfo));
         if (!inputFileInfo.Exists) throw new FileNotFoundException($"输入文件不存在: {inputFileInfo.FullName}");
-        
+
         using FileStream inputStream = inputFileInfo.OpenRead();
         using FileStream outputStream = outputFileInfo.Create();
         byte[] keyBytes = Convert.FromBase64String(key);
-        
+
         // 读取IV
         byte[] ivBytes = new byte[16];
         int bytesRead = inputStream.Read(ivBytes, 0, ivBytes.Length);
         if (bytesRead != 16) throw new ArgumentException("数据长度不足，无法提取IV");
-        
+
         // 解密剩余数据
         using Aes aes = Aes.Create();
         aes.Key = keyBytes;
@@ -266,21 +265,21 @@ public static partial class AesCrypto
     /// <remarks>
     /// 输入格式：IV + 加密数据
     /// 会自动从前16字节提取IV进行解密。
-    /// 与 AesCBCEncryptFileByPath(inputFilePath, outputFilePath, key) 方法配对使用。
+    /// 与 AesCBCEncryptFile(inputFilePath, outputFilePath, key) 方法配对使用。
     /// </remarks>
-    public static void AesCBCDecryptFileByPath(string inputFilePath, string outputFilePath, string key)
+    public static void CBCDecryptFile(string inputFilePath, string outputFilePath, string key)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesCBCDecryptFile(inputFileInfo, outputFileInfo, key);
+        CBCDecryptFile(inputFileInfo, outputFileInfo, key);
     }
     #endregion
 
-#if NET
     #region Aes-GCM 文件加解密
+#if NET
     /// <summary>
     /// Aes-GCM加密文件（推荐用于高安全性场景）
     /// </summary>
@@ -299,35 +298,35 @@ public static partial class AesCrypto
     /// - ciphertext: 加密后的数据
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static void AesGCMEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key)
+    public static void GCMEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key)
     {
         if (inputFileInfo is null) throw new ArgumentNullException(nameof(inputFileInfo));
         if (outputFileInfo is null) throw new ArgumentNullException(nameof(outputFileInfo));
         if (!inputFileInfo.Exists) throw new FileNotFoundException($"输入文件不存在: {inputFileInfo.FullName}");
-        
+
         using FileStream inputStream = inputFileInfo.OpenRead();
         using FileStream outputStream = outputFileInfo.Create();
         byte[] keyBytes = Convert.FromBase64String(key);
-        
+
         // 生成随机nonce并写入输出流
-        byte[] nonce = new byte[AesGcmNonceSize];
+        byte[] nonce = new byte[GCMNonceSize];
         RandomNumberGenerator.Fill(nonce);
         outputStream.Write(nonce, 0, nonce.Length);
-        
+
         // 使用流式加密处理大文件
         const int bufferSize = 8192;
         byte[] buffer = new byte[bufferSize];
-        byte[] tag = new byte[AesGcmTagSize];
-        
+        byte[] tag = new byte[GCMTagSize];
+
         // 读取所有数据到内存（GCM需要完整数据来生成认证标签）
         using MemoryStream inputMemoryStream = new();
         inputStream.CopyTo(inputMemoryStream);
         byte[] plaintext = inputMemoryStream.ToArray();
         byte[] ciphertext = new byte[plaintext.Length];
-        
-        using AesGcm aesGcm = new(keyBytes, AesGcmTagSize);
+
+        using AesGcm aesGcm = new(keyBytes, GCMTagSize);
         aesGcm.Encrypt(nonce, plaintext, ciphertext, tag);
-        
+
         // 写入tag和密文
         outputStream.Write(tag, 0, tag.Length);
         outputStream.Write(ciphertext, 0, ciphertext.Length);
@@ -351,14 +350,14 @@ public static partial class AesCrypto
     /// - ciphertext: 加密后的数据
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static void AesGCMEncryptFileByPath(string inputFilePath, string outputFilePath, string key)
+    public static void GCMEncryptFile(string inputFilePath, string outputFilePath, string key)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesGCMEncryptFile(inputFileInfo, outputFileInfo, key);
+        GCMEncryptFile(inputFileInfo, outputFileInfo, key);
     }
 
     /// <summary>
@@ -380,31 +379,31 @@ public static partial class AesCrypto
     /// nonce通过out参数单独返回，请妥善保存输出的密钥和nonce，解密时需要使用相同的密钥和nonce。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static void AesGCMEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, out string key, out string nonce)
+    public static void GCMEncryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, out string key, out string nonce)
     {
         if (inputFileInfo is null) throw new ArgumentNullException(nameof(inputFileInfo));
         if (outputFileInfo is null) throw new ArgumentNullException(nameof(outputFileInfo));
         if (!inputFileInfo.Exists) throw new FileNotFoundException($"输入文件不存在: {inputFileInfo.FullName}");
-        
-        key = GenerateAesGCMStringKey();
+
+        key = GenerateGCMStringKey();
         byte[] keyBytes = Convert.FromBase64String(key);
-        byte[] nonceBytes = new byte[AesGcmNonceSize];
+        byte[] nonceBytes = new byte[GCMNonceSize];
         RandomNumberGenerator.Fill(nonceBytes);
         nonce = Convert.ToBase64String(nonceBytes);
-        
+
         using FileStream inputStream = inputFileInfo.OpenRead();
         using FileStream outputStream = outputFileInfo.Create();
-        
+
         // 读取所有数据到内存（GCM需要完整数据来生成认证标签）
         using MemoryStream inputMemoryStream = new();
         inputStream.CopyTo(inputMemoryStream);
         byte[] plaintext = inputMemoryStream.ToArray();
         byte[] ciphertext = new byte[plaintext.Length];
-        byte[] tag = new byte[AesGcmTagSize];
-        
-        using AesGcm aesGcm = new(keyBytes, AesGcmTagSize);
+        byte[] tag = new byte[GCMTagSize];
+
+        using AesGcm aesGcm = new(keyBytes, GCMTagSize);
         aesGcm.Encrypt(nonceBytes, plaintext, ciphertext, tag);
-        
+
         // 写入tag和密文
         outputStream.Write(tag, 0, tag.Length);
         outputStream.Write(ciphertext, 0, ciphertext.Length);
@@ -429,14 +428,14 @@ public static partial class AesCrypto
     /// nonce通过out参数单独返回，请妥善保存输出的密钥和nonce，解密时需要使用相同的密钥和nonce。
     /// 安全提示：使用相同密钥和nonce加密多次会严重危及安全。
     /// </remarks>
-    public static void AesGCMEncryptFileByPath(string inputFilePath, string outputFilePath, out string key, out string nonce)
+    public static void GCMEncryptFile(string inputFilePath, string outputFilePath, out string key, out string nonce)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesGCMEncryptFile(inputFileInfo, outputFileInfo, out key, out nonce);
+        GCMEncryptFile(inputFileInfo, outputFileInfo, out key, out nonce);
     }
 
     /// <summary>
@@ -454,37 +453,37 @@ public static partial class AesCrypto
     /// 解密时会自动验证认证标签，如果数据被篡改会抛出异常。
     /// 与 AesGCMEncryptFile 方法配对使用。
     /// </remarks>
-    public static void AesGCMDecryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key)
+    public static void GCMDecryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key)
     {
         if (inputFileInfo is null) throw new ArgumentNullException(nameof(inputFileInfo));
         if (outputFileInfo is null) throw new ArgumentNullException(nameof(outputFileInfo));
         if (!inputFileInfo.Exists) throw new FileNotFoundException($"输入文件不存在: {inputFileInfo.FullName}");
-        
+
         using FileStream inputStream = inputFileInfo.OpenRead();
         using FileStream outputStream = outputFileInfo.Create();
         byte[] keyBytes = Convert.FromBase64String(key);
-        
+
         // 读取nonce
-        byte[] nonce = new byte[AesGcmNonceSize];
+        byte[] nonce = new byte[GCMNonceSize];
         int bytesRead = inputStream.Read(nonce, 0, nonce.Length);
-        if (bytesRead != AesGcmNonceSize) throw new ArgumentException("数据长度不足，无法提取nonce");
-        
+        if (bytesRead != GCMNonceSize) throw new ArgumentException("数据长度不足，无法提取nonce");
+
         // 读取tag和密文
         using MemoryStream inputMemoryStream = new();
         inputStream.CopyTo(inputMemoryStream);
         byte[] tagAndCiphertext = inputMemoryStream.ToArray();
-        
-        if (tagAndCiphertext.Length < AesGcmTagSize) throw new ArgumentException("数据长度不足，无法提取tag");
-        
-        byte[] tag = new byte[AesGcmTagSize];
-        byte[] ciphertext = new byte[tagAndCiphertext.Length - AesGcmTagSize];
-        Buffer.BlockCopy(tagAndCiphertext, 0, tag, 0, AesGcmTagSize);
-        Buffer.BlockCopy(tagAndCiphertext, AesGcmTagSize, ciphertext, 0, ciphertext.Length);
-        
+
+        if (tagAndCiphertext.Length < GCMTagSize) throw new ArgumentException("数据长度不足，无法提取tag");
+
+        byte[] tag = new byte[GCMTagSize];
+        byte[] ciphertext = new byte[tagAndCiphertext.Length - GCMTagSize];
+        Buffer.BlockCopy(tagAndCiphertext, 0, tag, 0, GCMTagSize);
+        Buffer.BlockCopy(tagAndCiphertext, GCMTagSize, ciphertext, 0, ciphertext.Length);
+
         byte[] plaintext = new byte[ciphertext.Length];
-        using AesGcm aesGcm = new(keyBytes, AesGcmTagSize);
+        using AesGcm aesGcm = new(keyBytes, GCMTagSize);
         aesGcm.Decrypt(nonce, ciphertext, tag, plaintext);
-        
+
         outputStream.Write(plaintext, 0, plaintext.Length);
     }
 
@@ -501,16 +500,16 @@ public static partial class AesCrypto
     /// <remarks>
     /// 输入格式：nonce + tag + ciphertext
     /// 解密时会自动验证认证标签，如果数据被篡改会抛出异常。
-    /// 与 AesGCMEncryptFileByPath 方法配对使用。
+    /// 与 AesGCMEncryptFile 方法配对使用。
     /// </remarks>
-    public static void AesGCMDecryptFileByPath(string inputFilePath, string outputFilePath, string key)
+    public static void GCMDecryptFile(string inputFilePath, string outputFilePath, string key)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesGCMDecryptFile(inputFileInfo, outputFileInfo, key);
+        GCMDecryptFile(inputFileInfo, outputFileInfo, key);
     }
 
     /// <summary>
@@ -532,33 +531,33 @@ public static partial class AesCrypto
     /// nonce作为单独参数传入，解密时会自动验证认证标签，如果数据被篡改会抛出异常。
     /// 与 AesGCMEncryptFile(inputFileInfo, outputFileInfo, out key, out nonce) 方法配对使用。
     /// </remarks>
-    public static void AesGCMDecryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key, string nonce)
+    public static void GCMDecryptFile(FileInfo inputFileInfo, FileInfo outputFileInfo, string key, string nonce)
     {
         if (inputFileInfo is null) throw new ArgumentNullException(nameof(inputFileInfo));
         if (outputFileInfo is null) throw new ArgumentNullException(nameof(outputFileInfo));
         if (!inputFileInfo.Exists) throw new FileNotFoundException($"输入文件不存在: {inputFileInfo.FullName}");
-        
+
         using FileStream inputStream = inputFileInfo.OpenRead();
         using FileStream outputStream = outputFileInfo.Create();
         byte[] keyBytes = Convert.FromBase64String(key);
         byte[] nonceBytes = Convert.FromBase64String(nonce);
-        
+
         // 读取tag和密文
         using MemoryStream inputMemoryStream = new();
         inputStream.CopyTo(inputMemoryStream);
         byte[] tagAndCiphertext = inputMemoryStream.ToArray();
-        
-        if (tagAndCiphertext.Length < AesGcmTagSize) throw new ArgumentException("数据长度不足，无法提取tag");
-        
-        byte[] tag = new byte[AesGcmTagSize];
-        byte[] ciphertext = new byte[tagAndCiphertext.Length - AesGcmTagSize];
-        Buffer.BlockCopy(tagAndCiphertext, 0, tag, 0, AesGcmTagSize);
-        Buffer.BlockCopy(tagAndCiphertext, AesGcmTagSize, ciphertext, 0, ciphertext.Length);
-        
+
+        if (tagAndCiphertext.Length < GCMTagSize) throw new ArgumentException("数据长度不足，无法提取tag");
+
+        byte[] tag = new byte[GCMTagSize];
+        byte[] ciphertext = new byte[tagAndCiphertext.Length - GCMTagSize];
+        Buffer.BlockCopy(tagAndCiphertext, 0, tag, 0, GCMTagSize);
+        Buffer.BlockCopy(tagAndCiphertext, GCMTagSize, ciphertext, 0, ciphertext.Length);
+
         byte[] plaintext = new byte[ciphertext.Length];
-        using AesGcm aesGcm = new(keyBytes, AesGcmTagSize);
+        using AesGcm aesGcm = new(keyBytes, GCMTagSize);
         aesGcm.Decrypt(nonceBytes, ciphertext, tag, plaintext);
-        
+
         outputStream.Write(plaintext, 0, plaintext.Length);
     }
 
@@ -579,17 +578,17 @@ public static partial class AesCrypto
     /// - tag: 16字节（认证标签）
     /// - ciphertext: 加密后的数据
     /// nonce作为单独参数传入，解密时会自动验证认证标签，如果数据被篡改会抛出异常。
-    /// 与 AesGCMEncryptFileByPath(inputFilePath, outputFilePath, out key, out nonce) 方法配对使用。
+    /// 与 AesGCMEncryptFile(inputFilePath, outputFilePath, out key, out nonce) 方法配对使用。
     /// </remarks>
-    public static void AesGCMDecryptFileByPath(string inputFilePath, string outputFilePath, string key, string nonce)
+    public static void GCMDecryptFile(string inputFilePath, string outputFilePath, string key, string nonce)
     {
         if (string.IsNullOrEmpty(inputFilePath)) throw new ArgumentException("输入文件路径不能为空", nameof(inputFilePath));
         if (string.IsNullOrEmpty(outputFilePath)) throw new ArgumentException("输出文件路径不能为空", nameof(outputFilePath));
-        
+
         FileInfo inputFileInfo = new(inputFilePath);
         FileInfo outputFileInfo = new(outputFilePath);
-        AesGCMDecryptFile(inputFileInfo, outputFileInfo, key, nonce);
+        GCMDecryptFile(inputFileInfo, outputFileInfo, key, nonce);
     }
-    #endregion
 #endif
+    #endregion
 }

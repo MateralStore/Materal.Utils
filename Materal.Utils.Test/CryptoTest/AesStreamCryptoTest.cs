@@ -72,12 +72,12 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 加密
-        long encryptedBytes = AesCrypto.AesCBCEncryptStream(inputStream, encryptedStream, key, iv);
+        long encryptedBytes = AesCrypto.CBCEncrypt(inputStream, encryptedStream, key, iv);
         Assert.AreEqual(originalData.Length, encryptedBytes, "加密字节数应与原始数据相同");
 
         // 解密
         encryptedStream.Position = 0;
-        long decryptedBytes = AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, key, iv);
+        long decryptedBytes = AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, key, iv);
         Assert.AreEqual(encryptedBytes, decryptedBytes, "解密字节数应与加密字节数相同");
 
         // 验证解密结果与原文相同
@@ -99,14 +99,14 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 加密（使用随机IV）
-        var (cryptoStream, iv) = AesCrypto.CreateAesCBCEncryptStream(encryptedStream, key);
+        var (cryptoStream, iv) = AesCrypto.CreateCBCEncryptStream(encryptedStream, key);
         inputStream.CopyTo(cryptoStream);
         cryptoStream.FlushFinalBlock();
         cryptoStream.Close();
 
         // 解密（自动提取IV）
         encryptedStream.Position = 0;
-        using AesCrypto.AesCBCDecryptStreamWrapper decryptStream = AesCrypto.CreateAesCBCDecryptStream(encryptedStream, key);
+        using AesCrypto.CBCDecryptStreamWrapper decryptStream = AesCrypto.CreateCBCDecryptStream(encryptedStream, key);
         decryptStream.CopyTo(decryptedStream);
 
         // 验证解密结果与原文相同
@@ -132,12 +132,12 @@ public partial class AesStreamCryptoTest
         const int bufferSize = 4096;
 
         // 加密
-        long encryptedBytes = AesCrypto.AesCBCEncryptStream(inputStream, encryptedStream, key, iv, bufferSize);
+        long encryptedBytes = AesCrypto.CBCEncrypt(inputStream, encryptedStream, key, iv, bufferSize);
         Assert.AreEqual(originalData.Length, encryptedBytes);
 
         // 解密
         encryptedStream.Position = 0;
-        long decryptedBytes = AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, key, iv, bufferSize);
+        long decryptedBytes = AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, key, iv, bufferSize);
         Assert.AreEqual(encryptedBytes, decryptedBytes);
 
         // 验证解密结果
@@ -159,12 +159,12 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 加密空流
-        long encryptedBytes = AesCrypto.AesCBCEncryptStream(inputStream, encryptedStream, key, iv);
+        long encryptedBytes = AesCrypto.CBCEncrypt(inputStream, encryptedStream, key, iv);
         Assert.AreEqual(0, encryptedBytes);
 
         // 解密空流
         encryptedStream.Position = 0;
-        long decryptedBytes = AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, key, iv);
+        long decryptedBytes = AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, key, iv);
         Assert.AreEqual(0, decryptedBytes);
 
         // 验证结果
@@ -186,26 +186,26 @@ public partial class AesStreamCryptoTest
 
         // 测试null输入流
         Assert.ThrowsExactly<ArgumentNullException>(() =>
-            AesCrypto.AesCBCEncryptStream(null!, stream, key, iv));
+            AesCrypto.CBCEncrypt(null!, stream, key, iv));
 
         // 测试null输出流
         Assert.ThrowsExactly<ArgumentNullException>(() =>
-            AesCrypto.AesCBCEncryptStream(stream, null!, key, iv));
+            AesCrypto.CBCEncrypt(stream, null!, key, iv));
 
         // 测试null密钥
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(stream, stream, null!, iv));
+            AesCrypto.CBCEncrypt(stream, stream, null!, iv));
 
         // 测试null IV
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(stream, stream, key, null!));
+            AesCrypto.CBCEncrypt(stream, stream, key, null!));
 
         // 测试字节数组版本
         Assert.ThrowsExactly<ArgumentNullException>(() =>
-            AesCrypto.AesCBCEncryptStream(null!, stream, keyBytes, ivBytes));
+            AesCrypto.CBCEncrypt(null!, stream, keyBytes, ivBytes));
 
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(stream, stream, null!, ivBytes));
+            AesCrypto.CBCEncrypt(stream, stream, null!, ivBytes));
     }
 
     /// <summary>
@@ -225,11 +225,11 @@ public partial class AesStreamCryptoTest
         using MemoryStream outputStream = new();
 
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(inputStream, outputStream, invalidKey1, iv));
+            AesCrypto.CBCEncrypt(inputStream, outputStream, invalidKey1, iv));
 
         inputStream.Position = 0;
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(inputStream, outputStream, invalidKey2, iv));
+            AesCrypto.CBCEncrypt(inputStream, outputStream, invalidKey2, iv));
     }
 
     /// <summary>
@@ -249,11 +249,11 @@ public partial class AesStreamCryptoTest
         using MemoryStream outputStream = new();
 
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(inputStream, outputStream, key, invalidIV1));
+            AesCrypto.CBCEncrypt(inputStream, outputStream, key, invalidIV1));
 
         inputStream.Position = 0;
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(inputStream, outputStream, key, invalidIV2));
+            AesCrypto.CBCEncrypt(inputStream, outputStream, key, invalidIV2));
     }
 
     /// <summary>
@@ -273,19 +273,19 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 正确加密
-        AesCrypto.AesCBCEncryptStream(inputStream, encryptedStream, key, iv);
+        AesCrypto.CBCEncrypt(inputStream, encryptedStream, key, iv);
 
         // 使用错误的密钥解密应该抛出异常
         encryptedStream.Position = 0;
         Assert.ThrowsExactly<CryptographicException>(() =>
-            AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, wrongKey, iv));
+            AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, wrongKey, iv));
 
         // 使用错误的IV解密 - 注意：可能不会抛出异常，但解密结果应该与原文不同
         decryptedStream.SetLength(0);
         encryptedStream.Position = 0;
         try
         {
-            AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, key, wrongIV);
+            AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, key, wrongIV);
             // 如果没有抛出异常，检查解密结果是否与原文不同
             byte[] decryptedData = decryptedStream.ToArray();
             CollectionAssert.AreNotEqual(originalData, decryptedData, "使用错误的IV解密，结果应该与原文不同");
@@ -318,11 +318,11 @@ public partial class AesStreamCryptoTest
 
         // 测试不可读的输入流
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(notReadableStream, writableStream, key, iv));
+            AesCrypto.CBCEncrypt(notReadableStream, writableStream, key, iv));
 
         // 测试不可写的输出流
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesCBCEncryptStream(readableStream, notWritableStream, key, iv));
+            AesCrypto.CBCEncrypt(readableStream, notWritableStream, key, iv));
     }
 
     /// <summary>
@@ -344,11 +344,11 @@ public partial class AesStreamCryptoTest
             using MemoryStream decryptedStream = new();
 
             // 加密
-            long encryptedBytes = AesCrypto.AesCBCEncryptStream(inputStream, encryptedStream, key, iv, bufferSize);
+            long encryptedBytes = AesCrypto.CBCEncrypt(inputStream, encryptedStream, key, iv, bufferSize);
 
             // 解密
             encryptedStream.Position = 0;
-            long decryptedBytes = AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, key, iv, bufferSize);
+            long decryptedBytes = AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, key, iv, bufferSize);
 
             // 验证
             Assert.AreEqual(originalData.Length, encryptedBytes, $"缓冲区大小{bufferSize}时加密字节数不匹配");
@@ -372,9 +372,9 @@ public partial class AesStreamCryptoTest
         using (MemoryStream encryptedStream = new())
         using (MemoryStream decryptedStream = new())
         {
-            AesCrypto.AesCBCEncryptStream(inputStream, encryptedStream, key128, iv);
+            AesCrypto.CBCEncrypt(inputStream, encryptedStream, key128, iv);
             encryptedStream.Position = 0;
-            AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, key128, iv);
+            AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, key128, iv);
             CollectionAssert.AreEqual(originalData, decryptedStream.ToArray());
         }
 
@@ -384,9 +384,9 @@ public partial class AesStreamCryptoTest
         using (MemoryStream encryptedStream = new())
         using (MemoryStream decryptedStream = new())
         {
-            AesCrypto.AesCBCEncryptStream(inputStream, encryptedStream, key192, iv);
+            AesCrypto.CBCEncrypt(inputStream, encryptedStream, key192, iv);
             encryptedStream.Position = 0;
-            AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, key192, iv);
+            AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, key192, iv);
             CollectionAssert.AreEqual(originalData, decryptedStream.ToArray());
         }
 
@@ -396,9 +396,9 @@ public partial class AesStreamCryptoTest
         using (MemoryStream encryptedStream = new())
         using (MemoryStream decryptedStream = new())
         {
-            AesCrypto.AesCBCEncryptStream(inputStream, encryptedStream, key256, iv);
+            AesCrypto.CBCEncrypt(inputStream, encryptedStream, key256, iv);
             encryptedStream.Position = 0;
-            AesCrypto.AesCBCDecryptStream(encryptedStream, decryptedStream, key256, iv);
+            AesCrypto.CBCDecrypt(encryptedStream, decryptedStream, key256, iv);
             CollectionAssert.AreEqual(originalData, decryptedStream.ToArray());
         }
     }
@@ -421,12 +421,12 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 加密
-        long encryptedBytes = AesCrypto.AesGCMEncryptToStream(inputStream, encryptedStream, key);
+        long encryptedBytes = AesCrypto.GCMEncrypt(inputStream, encryptedStream, key);
         Assert.AreEqual(originalData.Length, encryptedBytes, "加密字节数应与原始数据相同");
 
         // 解密
         encryptedStream.Position = 0;
-        long decryptedBytes = AesCrypto.AesGCMDecryptFromStream(encryptedStream, decryptedStream, key);
+        long decryptedBytes = AesCrypto.GCMDecrypt(encryptedStream, decryptedStream, key);
         Assert.AreEqual(originalData.Length, decryptedBytes, "解密字节数应与原始数据相同");
 
         // 验证解密结果与原文相同
@@ -448,13 +448,13 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 加密（使用包装器）
-        var (encryptWrapper, nonce) = AesCrypto.CreateAesGCMEncryptStream(encryptedStream, key);
+        var (encryptWrapper, nonce) = AesCrypto.CreateGCMEncryptStream(encryptedStream, key);
         inputStream.CopyTo(encryptWrapper);
         encryptWrapper.Close();
 
         // 解密（使用包装器）
         encryptedStream.Position = 0;
-        using AesCrypto.AesGCMDecryptStreamWrapper decryptWrapper = AesCrypto.CreateAesGCMDecryptStream(encryptedStream, key);
+        using AesCrypto.GCMDecryptStreamWrapper decryptWrapper = AesCrypto.CreateGCMDecryptStream(encryptedStream, key);
         decryptWrapper.CopyTo(decryptedStream);
 
         // 验证解密结果与原文相同
@@ -479,12 +479,12 @@ public partial class AesStreamCryptoTest
         const int bufferSize = 4096;
 
         // 加密
-        long encryptedBytes = AesCrypto.AesGCMEncryptToStream(inputStream, encryptedStream, key, bufferSize);
+        long encryptedBytes = AesCrypto.GCMEncrypt(inputStream, encryptedStream, key, bufferSize);
         Assert.AreEqual(originalData.Length, encryptedBytes);
 
         // 解密
         encryptedStream.Position = 0;
-        long decryptedBytes = AesCrypto.AesGCMDecryptFromStream(encryptedStream, decryptedStream, key, bufferSize);
+        long decryptedBytes = AesCrypto.GCMDecrypt(encryptedStream, decryptedStream, key, bufferSize);
         Assert.AreEqual(originalData.Length, decryptedBytes);
 
         // 验证解密结果
@@ -505,12 +505,12 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 加密空流
-        long encryptedBytes = AesCrypto.AesGCMEncryptToStream(inputStream, encryptedStream, key);
+        long encryptedBytes = AesCrypto.GCMEncrypt(inputStream, encryptedStream, key);
         Assert.AreEqual(0, encryptedBytes);
 
         // 解密空流
         encryptedStream.Position = 0;
-        long decryptedBytes = AesCrypto.AesGCMDecryptFromStream(encryptedStream, decryptedStream, key);
+        long decryptedBytes = AesCrypto.GCMDecrypt(encryptedStream, decryptedStream, key);
         Assert.AreEqual(0, decryptedBytes);
 
         // 验证结果
@@ -530,22 +530,22 @@ public partial class AesStreamCryptoTest
 
         // 测试null输入流
         Assert.ThrowsExactly<ArgumentNullException>(() =>
-            AesCrypto.AesGCMEncryptToStream(null!, stream, key));
+            AesCrypto.GCMEncrypt(null!, stream, key));
 
         // 测试null输出流
         Assert.ThrowsExactly<ArgumentNullException>(() =>
-            AesCrypto.AesGCMEncryptToStream(stream, null!, key));
+            AesCrypto.GCMEncrypt(stream, null!, key));
 
         // 测试null密钥
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesGCMEncryptToStream(stream, stream, (string)null!));
+            AesCrypto.GCMEncrypt(stream, stream, (string)null!));
 
         // 测试字节数组版本
         Assert.ThrowsExactly<ArgumentNullException>(() =>
-            AesCrypto.AesGCMEncryptToStream(null!, stream, keyBytes));
+            AesCrypto.GCMEncrypt(null!, stream, keyBytes));
 
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesGCMEncryptToStream(stream, stream, (byte[])null!));
+            AesCrypto.GCMEncrypt(stream, stream, (byte[])null!));
     }
 
     /// <summary>
@@ -564,11 +564,11 @@ public partial class AesStreamCryptoTest
         using MemoryStream outputStream = new();
 
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesGCMEncryptToStream(inputStream, outputStream, invalidKey1));
+            AesCrypto.GCMEncrypt(inputStream, outputStream, invalidKey1));
 
         inputStream.Position = 0;
         Assert.ThrowsExactly<ArgumentException>(() =>
-            AesCrypto.AesGCMEncryptToStream(inputStream, outputStream, invalidKey2));
+            AesCrypto.GCMEncrypt(inputStream, outputStream, invalidKey2));
     }
 
     /// <summary>
@@ -586,12 +586,12 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 正确加密
-        AesCrypto.AesGCMEncryptToStream(inputStream, encryptedStream, key);
+        AesCrypto.GCMEncrypt(inputStream, encryptedStream, key);
 
         // 使用错误的密钥解密应该抛出异常
         encryptedStream.Position = 0;
         Assert.ThrowsExactly<AuthenticationTagMismatchException>(() =>
-            AesCrypto.AesGCMDecryptFromStream(encryptedStream, decryptedStream, wrongKey));
+            AesCrypto.GCMDecrypt(encryptedStream, decryptedStream, wrongKey));
     }
 
     /// <summary>
@@ -608,7 +608,7 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 正确加密
-        AesCrypto.AesGCMEncryptToStream(inputStream, encryptedStream, key);
+        AesCrypto.GCMEncrypt(inputStream, encryptedStream, key);
 
         // 篡改加密数据
         byte[] encryptedBytes = encryptedStream.ToArray();
@@ -618,7 +618,7 @@ public partial class AesStreamCryptoTest
 
         // 解密被篡改的数据应该抛出异常
         Assert.ThrowsExactly<AuthenticationTagMismatchException>(() =>
-            AesCrypto.AesGCMDecryptFromStream(tamperedStream, decryptedStream, key));
+            AesCrypto.GCMDecrypt(tamperedStream, decryptedStream, key));
     }
 
     /// <summary>
@@ -635,9 +635,9 @@ public partial class AesStreamCryptoTest
         using (MemoryStream encryptedStream = new())
         using (MemoryStream decryptedStream = new())
         {
-            AesCrypto.AesGCMEncryptToStream(inputStream, encryptedStream, key128);
+            AesCrypto.GCMEncrypt(inputStream, encryptedStream, key128);
             encryptedStream.Position = 0;
-            AesCrypto.AesGCMDecryptFromStream(encryptedStream, decryptedStream, key128);
+            AesCrypto.GCMDecrypt(encryptedStream, decryptedStream, key128);
             CollectionAssert.AreEqual(originalData, decryptedStream.ToArray());
         }
 
@@ -647,9 +647,9 @@ public partial class AesStreamCryptoTest
         using (MemoryStream encryptedStream = new())
         using (MemoryStream decryptedStream = new())
         {
-            AesCrypto.AesGCMEncryptToStream(inputStream, encryptedStream, key192);
+            AesCrypto.GCMEncrypt(inputStream, encryptedStream, key192);
             encryptedStream.Position = 0;
-            AesCrypto.AesGCMDecryptFromStream(encryptedStream, decryptedStream, key192);
+            AesCrypto.GCMDecrypt(encryptedStream, decryptedStream, key192);
             CollectionAssert.AreEqual(originalData, decryptedStream.ToArray());
         }
 
@@ -659,9 +659,9 @@ public partial class AesStreamCryptoTest
         using (MemoryStream encryptedStream = new())
         using (MemoryStream decryptedStream = new())
         {
-            AesCrypto.AesGCMEncryptToStream(inputStream, encryptedStream, key256);
+            AesCrypto.GCMEncrypt(inputStream, encryptedStream, key256);
             encryptedStream.Position = 0;
-            AesCrypto.AesGCMDecryptFromStream(encryptedStream, decryptedStream, key256);
+            AesCrypto.GCMDecrypt(encryptedStream, decryptedStream, key256);
             CollectionAssert.AreEqual(originalData, decryptedStream.ToArray());
         }
     }
@@ -683,8 +683,8 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream2 = new();
 
         // 使用相同密钥加密两次，应该产生不同的结果（因为nonce不同）
-        AesCrypto.AesGCMEncryptToStream(inputStream1, encryptedStream1, key);
-        AesCrypto.AesGCMEncryptToStream(inputStream2, encryptedStream2, key);
+        AesCrypto.GCMEncrypt(inputStream1, encryptedStream1, key);
+        AesCrypto.GCMEncrypt(inputStream2, encryptedStream2, key);
 
         // 加密结果应该不同
         byte[] encryptedBytes1 = encryptedStream1.ToArray();
@@ -694,8 +694,8 @@ public partial class AesStreamCryptoTest
         // 但解密结果应该相同
         encryptedStream1.Position = 0;
         encryptedStream2.Position = 0;
-        AesCrypto.AesGCMDecryptFromStream(encryptedStream1, decryptedStream1, key);
-        AesCrypto.AesGCMDecryptFromStream(encryptedStream2, decryptedStream2, key);
+        AesCrypto.GCMDecrypt(encryptedStream1, decryptedStream1, key);
+        AesCrypto.GCMDecrypt(encryptedStream2, decryptedStream2, key);
 
         CollectionAssert.AreEqual(originalData, decryptedStream1.ToArray());
         CollectionAssert.AreEqual(originalData, decryptedStream2.ToArray());
@@ -715,7 +715,7 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 加密（多次写入）
-        var (encryptWrapper, nonce) = AesCrypto.CreateAesGCMEncryptStream(encryptedStream, key);
+        var (encryptWrapper, nonce) = AesCrypto.CreateGCMEncryptStream(encryptedStream, key);
 
         // 分多次写入数据
         encryptWrapper.Write(originalData, 0, originalData.Length / 2);
@@ -724,7 +724,7 @@ public partial class AesStreamCryptoTest
 
         // 解密
         encryptedStream.Position = 0;
-        using AesCrypto.AesGCMDecryptStreamWrapper decryptWrapper = AesCrypto.CreateAesGCMDecryptStream(encryptedStream, key);
+        using AesCrypto.GCMDecryptStreamWrapper decryptWrapper = AesCrypto.CreateGCMDecryptStream(encryptedStream, key);
         decryptWrapper.CopyTo(decryptedStream);
 
         // 验证结果
@@ -744,14 +744,14 @@ public partial class AesStreamCryptoTest
         using MemoryStream decryptedStream = new();
 
         // 异步加密
-        var (encryptWrapper, nonce) = AesCrypto.CreateAesGCMEncryptStream(encryptedStream, key);
+        var (encryptWrapper, nonce) = AesCrypto.CreateGCMEncryptStream(encryptedStream, key);
         await encryptWrapper.WriteAsync(originalData, TestContext.CancellationToken);
         await encryptWrapper.FlushAsync(TestContext.CancellationToken);
         encryptWrapper.Close();
 
         // 异步解密
         encryptedStream.Position = 0;
-        using AesCrypto.AesGCMDecryptStreamWrapper decryptWrapper = AesCrypto.CreateAesGCMDecryptStream(encryptedStream, key);
+        using AesCrypto.GCMDecryptStreamWrapper decryptWrapper = AesCrypto.CreateGCMDecryptStream(encryptedStream, key);
         await decryptWrapper.CopyToAsync(decryptedStream, TestContext.CancellationToken);
 
         // 验证结果
