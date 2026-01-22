@@ -8,5 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Materal.Utils\Materal.Utils.csproj" />
     <ProjectReference Include="..\Materal.Utils.Image\Materal.Utils.Image.csproj" />
+    <ProjectReference Include="..\Materal.Utils.Crypto\Materal.Utils.Crypto.csproj" />
   </ItemGroup>
 </Project>

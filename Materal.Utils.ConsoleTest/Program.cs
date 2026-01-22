@@ -1,4 +1,6 @@
-﻿namespace Materal.Utils.ConsoleTest;
+﻿using Materal.Utils.Crypto;
+
+namespace Materal.Utils.ConsoleTest;
 
 internal class Program
 {
