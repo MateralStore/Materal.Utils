@@ -385,6 +385,33 @@ public static partial class RsaCrypto
 
     #region 辅助方法
     /// <summary>
+    /// 将XML格式的RSA密钥转换为PEM格式
+    /// </summary>
+    /// <param name="publicKeyXml">公钥XML</param>
+    /// <param name="privateKeyXml">私钥XML</param>
+    /// <returns>PEM格式的公钥和私钥</returns>
+    public static (string publicKeyPem, string privateKeyPem) ConvertXmlToPem(string publicKeyXml, string privateKeyXml)
+    {
+        try
+        {
+            using RSACryptoServiceProvider rsa = new();
+            rsa.FromXmlString(privateKeyXml);
+
+            // 导出私钥为PEM格式
+            string privateKeyPem = ExportPrivateKeyToPem(rsa);
+
+            // 导出公钥为PEM格式
+            string publicKeyPem = ExportPublicKeyToPem(rsa);
+
+            return (publicKeyPem, privateKeyPem);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("无法将XML格式的RSA密钥转换为PEM格式", ex);
+        }
+    }
+
+    /// <summary>
     /// 检测密钥格式
     /// </summary>
     /// <param name="key">密钥字符串</param>
@@ -395,7 +422,7 @@ public static partial class RsaCrypto
             return KeyFormat.Unknown;
 
         key = key.Trim();
-        
+
         // 检查是否为PEM格式
         if (key.StartsWith("-----BEGIN") && key.EndsWith("-----"))
         {
@@ -404,11 +431,11 @@ public static partial class RsaCrypto
             else if (key.Contains("PRIVATE KEY") || key.Contains("RSA PRIVATE KEY"))
                 return KeyFormat.PemPrivate;
         }
-        
+
         // 检查是否为XML格式
         if (key.StartsWith("<RSAKeyValue>") && key.EndsWith("</RSAKeyValue>"))
             return KeyFormat.Xml;
-            
+
         return KeyFormat.Unknown;
     }
 
@@ -626,22 +653,22 @@ public static partial class RsaCrypto
         // 在实际项目中，建议使用专门的密钥转换库
         using RSACryptoServiceProvider tempRsa = new();
         tempRsa.FromXmlString(xmlKey);
-        
+
         if (isPrivate)
         {
             // 对于私钥，使用传统的RSA私钥格式
             byte[] privateKeyBytes = tempRsa.ExportCspBlob(true);
             string base64Key = Convert.ToBase64String(privateKeyBytes);
-            
+
             StringBuilder pemBuilder = new();
             pemBuilder.AppendLine("-----BEGIN RSA PRIVATE KEY-----");
-            
+
             for (int i = 0; i < base64Key.Length; i += 64)
             {
                 int length = Math.Min(64, base64Key.Length - i);
                 pemBuilder.AppendLine(base64Key.Substring(i, length));
             }
-            
+
             pemBuilder.AppendLine("-----END RSA PRIVATE KEY-----");
             return pemBuilder.ToString();
         }
@@ -650,16 +677,16 @@ public static partial class RsaCrypto
             // 对于公钥，使用传统的格式
             byte[] publicKeyBytes = tempRsa.ExportCspBlob(false);
             string base64Key = Convert.ToBase64String(publicKeyBytes);
-            
+
             StringBuilder pemBuilder = new();
             pemBuilder.AppendLine("-----BEGIN PUBLIC KEY-----");
-            
+
             for (int i = 0; i < base64Key.Length; i += 64)
             {
                 int length = Math.Min(64, base64Key.Length - i);
                 pemBuilder.AppendLine(base64Key.Substring(i, length));
             }
-            
+
             pemBuilder.AppendLine("-----END PUBLIC KEY-----");
             return pemBuilder.ToString();
         }

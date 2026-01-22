@@ -32,7 +32,7 @@ public class RsaCryptoTest
     public void GenerateKeyPair_ShouldReturnValidKeys()
     {
         // Act
-        var (publicKey, privateKey) = RsaCrypto.GenerateKeyPair();
+        (string? publicKey, string? privateKey) = RsaCrypto.GenerateKeyPair();
 
         // Assert
         Assert.IsNotNull(publicKey);
@@ -49,11 +49,11 @@ public class RsaCryptoTest
     public void GenerateKeyPair_WithDifferentKeySizes_ShouldReturnValidKeys()
     {
         // Act & Assert
-        var (publicKey1024, privateKey1024) = RsaCrypto.GenerateKeyPair(1024);
+        (string? publicKey1024, string? privateKey1024) = RsaCrypto.GenerateKeyPair(1024);
         Assert.IsNotNull(publicKey1024);
         Assert.IsNotNull(privateKey1024);
 
-        var (publicKey4096, privateKey4096) = RsaCrypto.GenerateKeyPair(4096);
+        (string? publicKey4096, string? privateKey4096) = RsaCrypto.GenerateKeyPair(4096);
         Assert.IsNotNull(publicKey4096);
         Assert.IsNotNull(privateKey4096);
 
@@ -79,7 +79,7 @@ public class RsaCryptoTest
     public void GenerateKeyPairPem_ShouldReturnValidPemKeys()
     {
         // Act
-        var (publicKeyPem, privateKeyPem) = RsaCrypto.GenerateKeyPairPem();
+        (string? publicKeyPem, string? privateKeyPem) = RsaCrypto.GenerateKeyPairPem();
 
         // Assert
         Assert.IsNotNull(publicKeyPem);
@@ -99,13 +99,13 @@ public class RsaCryptoTest
     public void GenerateKeyPairPem_WithDifferentKeySizes_ShouldReturnValidPemKeys()
     {
         // Act & Assert
-        var (publicKeyPem1024, privateKeyPem1024) = RsaCrypto.GenerateKeyPairPem(1024);
+        (string? publicKeyPem1024, string? privateKeyPem1024) = RsaCrypto.GenerateKeyPairPem(1024);
         Assert.IsNotNull(publicKeyPem1024);
         Assert.IsNotNull(privateKeyPem1024);
         Assert.Contains("-----BEGIN PUBLIC KEY-----", publicKeyPem1024);
         Assert.Contains("-----BEGIN PRIVATE KEY-----", privateKeyPem1024);
 
-        var (publicKeyPem4096, privateKeyPem4096) = RsaCrypto.GenerateKeyPairPem(4096);
+        (string? publicKeyPem4096, string? privateKeyPem4096) = RsaCrypto.GenerateKeyPairPem(4096);
         Assert.IsNotNull(publicKeyPem4096);
         Assert.IsNotNull(privateKeyPem4096);
         Assert.Contains("-----BEGIN PUBLIC KEY-----", publicKeyPem4096);
@@ -483,7 +483,7 @@ public class RsaCryptoTest
     {
         // Arrange
         byte[] encryptedData = RsaCrypto.Encrypt(_testBytes, _publicKey);
-        var (_, wrongPrivateKey) = RsaCrypto.GenerateKeyPair(); // 生成新的密钥对
+        (string _, string? wrongPrivateKey) = RsaCrypto.GenerateKeyPair(); // 生成新的密钥对
 
         // Act & Assert
         Assert.ThrowsExactly<CryptographicException>(() => RsaCrypto.Decrypt(encryptedData, wrongPrivateKey));
@@ -607,6 +607,202 @@ public class RsaCryptoTest
         string textSignature = RsaCrypto.SignText(_testText, _privateKeyPem);
         bool isTextValid = RsaCrypto.VerifyText(_testText, textSignature, _publicKeyPem);
         Assert.IsTrue(isTextValid);
+    }
+    #endregion
+
+    #region 密钥格式转换测试
+    /// <summary>
+    /// 测试XML格式密钥转换为PEM格式
+    /// </summary>
+    [TestMethod]
+    public void ConvertXmlToPem_ShouldReturnValidPemKeys()
+    {
+        // Act
+        (string? publicKeyPem, string? privateKeyPem) = RsaCrypto.ConvertXmlToPem(_publicKey, _privateKey);
+
+        // Assert
+        Assert.IsNotNull(publicKeyPem);
+        Assert.IsNotNull(privateKeyPem);
+        Assert.StartsWith("-----BEGIN PUBLIC KEY-----", publicKeyPem);
+        Assert.EndsWith("-----END PUBLIC KEY-----", publicKeyPem.Trim());
+        Assert.StartsWith("-----BEGIN PRIVATE KEY-----", privateKeyPem);
+        Assert.EndsWith("-----END PRIVATE KEY-----", privateKeyPem.Trim());
+        Assert.IsGreaterThan(0, publicKeyPem.Length);
+        Assert.IsGreaterThan(0, privateKeyPem.Length);
+
+        // 验证转换后的PEM密钥可以正常使用
+        string encryptedText = RsaCrypto.Encrypt(_testText, publicKeyPem);
+        string decryptedText = RsaCrypto.Decrypt(encryptedText, privateKeyPem);
+        Assert.AreEqual(_testText, decryptedText);
+    }
+
+    /// <summary>
+    /// 测试使用无效的XML私钥转换为PEM格式
+    /// </summary>
+    [TestMethod]
+    public void ConvertXmlToPem_WithInvalidPrivateKeyXml_ShouldThrowException()
+    {
+        // Arrange
+        string invalidPrivateKeyXml = "<RSAKeyValue><Invalid>InvalidKey</Invalid></RSAKeyValue>";
+
+        // Act & Assert
+        Assert.ThrowsExactly<InvalidOperationException>(() => RsaCrypto.ConvertXmlToPem(_publicKey, invalidPrivateKeyXml));
+    }
+
+    /// <summary>
+    /// 测试使用null私钥XML转换为PEM格式
+    /// </summary>
+    [TestMethod]
+    public void ConvertXmlToPem_WithNullPrivateKeyXml_ShouldThrowException()
+    {
+        // Act & Assert
+        Assert.ThrowsExactly<InvalidOperationException>(() => RsaCrypto.ConvertXmlToPem(_publicKey, null!));
+    }
+
+    /// <summary>
+    /// 测试使用空字符串私钥XML转换为PEM格式
+    /// </summary>
+    [TestMethod]
+    public void ConvertXmlToPem_WithEmptyPrivateKeyXml_ShouldThrowException()
+    {
+        // Act & Assert
+        Assert.ThrowsExactly<InvalidOperationException>(() => RsaCrypto.ConvertXmlToPem(_publicKey, string.Empty));
+    }
+
+    /// <summary>
+    /// 测试转换后的PEM密钥与原始PEM密钥的兼容性
+    /// </summary>
+    [TestMethod]
+    public void ConvertXmlToPem_ConvertedKeysShouldWorkWithOriginalPemKeys()
+    {
+        // Act
+        (string convertedPublicKeyPem, string convertedPrivateKeyPem) = RsaCrypto.ConvertXmlToPem(_publicKey, _privateKey);
+
+        // 验证转换后的密钥与原始PEM密钥功能相同
+        // 使用转换后的密钥加密解密
+        string encryptedWithConverted = RsaCrypto.Encrypt(_testText, convertedPublicKeyPem);
+        string decryptedWithConverted = RsaCrypto.Decrypt(encryptedWithConverted, convertedPrivateKeyPem);
+        Assert.AreEqual(_testText, decryptedWithConverted);
+
+        // 使用原始PEM密钥加密解密
+        string encryptedWithOriginal = RsaCrypto.Encrypt(_testText, _publicKeyPem);
+        string decryptedWithOriginal = RsaCrypto.Decrypt(encryptedWithOriginal, _privateKeyPem);
+        Assert.AreEqual(_testText, decryptedWithOriginal);
+
+        // 验证转换后的密钥格式正确
+        Assert.AreEqual(KeyFormat.PemPublic, RsaCrypto.DetectKeyFormat(convertedPublicKeyPem));
+        Assert.AreEqual(KeyFormat.PemPrivate, RsaCrypto.DetectKeyFormat(convertedPrivateKeyPem));
+    }
+
+    /// <summary>
+    /// 测试转换后的PEM密钥签名验证功能
+    /// </summary>
+    [TestMethod]
+    public void ConvertXmlToPem_ConvertedKeysShouldWorkForSigning()
+    {
+        // Act
+        (string convertedPublicKeyPem, string convertedPrivateKeyPem) = RsaCrypto.ConvertXmlToPem(_publicKey, _privateKey);
+
+        // 验证转换后的密钥可以用于签名和验证
+        byte[] signature = RsaCrypto.SignData(_testBytes, convertedPrivateKeyPem);
+        bool isValid = RsaCrypto.VerifyData(_testBytes, signature, convertedPublicKeyPem);
+        Assert.IsTrue(isValid);
+
+        // 验证文本签名
+        string textSignature = RsaCrypto.SignText(_testText, convertedPrivateKeyPem);
+        bool isTextValid = RsaCrypto.VerifyText(_testText, textSignature, convertedPublicKeyPem);
+        Assert.IsTrue(isTextValid);
+    }
+
+    /// <summary>
+    /// 测试XML格式密钥与转换后PEM格式密钥的加密解密结果一致性
+    /// </summary>
+    [TestMethod]
+    public void ConvertXmlToPem_EncryptionDecryptionResultsShouldBeConsistent()
+    {
+        // Act
+        (string convertedPublicKeyPem, string convertedPrivateKeyPem) = RsaCrypto.ConvertXmlToPem(_publicKey, _privateKey);
+
+        // 使用原始XML格式密钥进行加密解密
+        string encryptedWithXmlPublic = RsaCrypto.Encrypt(_testText, _publicKey);
+        string decryptedWithXmlPrivate = RsaCrypto.Decrypt(encryptedWithXmlPublic, _privateKey);
+
+        // 使用转换后的PEM格式密钥进行加密解密
+        string encryptedWithPemPublic = RsaCrypto.Encrypt(_testText, convertedPublicKeyPem);
+        string decryptedWithPemPrivate = RsaCrypto.Decrypt(encryptedWithPemPublic, convertedPrivateKeyPem);
+
+        // 验证解密结果一致性
+        Assert.AreEqual(_testText, decryptedWithXmlPrivate, "XML格式密钥解密结果应该与原文相同");
+        Assert.AreEqual(_testText, decryptedWithPemPrivate, "PEM格式密钥解密结果应该与原文相同");
+        Assert.AreEqual(decryptedWithXmlPrivate, decryptedWithPemPrivate, "XML和PEM格式密钥的解密结果应该完全相同");
+
+        // 验证不同格式密钥加密同一数据的结果不同（因为每次加密可能包含随机填充）
+        // 但解密后应该得到相同的原文
+        string decryptedXmlWithPem = RsaCrypto.Decrypt(encryptedWithXmlPublic, convertedPrivateKeyPem);
+        string decryptedPemWithXml = RsaCrypto.Decrypt(encryptedWithPemPublic, _privateKey);
+
+        Assert.AreEqual(_testText, decryptedXmlWithPem, "XML公钥加密的数据可以用PEM私钥解密");
+        Assert.AreEqual(_testText, decryptedPemWithXml, "PEM公钥加密的数据可以用XML私钥解密");
+
+        // 字节数组加密解密一致性测试
+        byte[] encryptedBytesWithXml = RsaCrypto.Encrypt(_testBytes, _publicKey);
+        byte[] decryptedBytesWithXml = RsaCrypto.Decrypt(encryptedBytesWithXml, _privateKey);
+
+        byte[] encryptedBytesWithPem = RsaCrypto.Encrypt(_testBytes, convertedPublicKeyPem);
+        byte[] decryptedBytesWithPem = RsaCrypto.Decrypt(encryptedBytesWithPem, convertedPrivateKeyPem);
+
+        CollectionAssert.AreEqual(_testBytes, decryptedBytesWithXml, "XML格式密钥字节数组解密结果应该与原文相同");
+        CollectionAssert.AreEqual(_testBytes, decryptedBytesWithPem, "PEM格式密钥字节数组解密结果应该与原文相同");
+        CollectionAssert.AreEqual(decryptedBytesWithXml, decryptedBytesWithPem, "XML和PEM格式密钥的字节数组解密结果应该完全相同");
+
+        // 跨格式解密测试
+        byte[] decryptedXmlBytesWithPem = RsaCrypto.Decrypt(encryptedBytesWithXml, convertedPrivateKeyPem);
+        byte[] decryptedPemBytesWithXml = RsaCrypto.Decrypt(encryptedBytesWithPem, _privateKey);
+
+        CollectionAssert.AreEqual(_testBytes, decryptedXmlBytesWithPem, "XML公钥加密的字节数组可以用PEM私钥解密");
+        CollectionAssert.AreEqual(_testBytes, decryptedPemBytesWithXml, "PEM公钥加密的字节数组可以用XML私钥解密");
+    }
+
+    /// <summary>
+    /// 测试XML格式密钥与转换后PEM格式密钥的签名验证结果一致性
+    /// </summary>
+    [TestMethod]
+    public void ConvertXmlToPem_SignatureVerificationResultsShouldBeConsistent()
+    {
+        // Act
+        (string convertedPublicKeyPem, string convertedPrivateKeyPem) = RsaCrypto.ConvertXmlToPem(_publicKey, _privateKey);
+
+        // 使用原始XML格式密钥进行签名
+        byte[] signatureWithXml = RsaCrypto.SignData(_testBytes, _privateKey);
+        string textSignatureWithXml = RsaCrypto.SignText(_testText, _privateKey);
+
+        // 使用转换后的PEM格式密钥进行签名
+        byte[] signatureWithPem = RsaCrypto.SignData(_testBytes, convertedPrivateKeyPem);
+        string textSignatureWithPem = RsaCrypto.SignText(_testText, convertedPrivateKeyPem);
+
+        // 验证签名结果一致性 - 使用各自的公钥验证
+        bool isValidXmlWithXml = RsaCrypto.VerifyData(_testBytes, signatureWithXml, _publicKey);
+        bool isValidPemWithPem = RsaCrypto.VerifyData(_testBytes, signatureWithPem, convertedPublicKeyPem);
+        bool isTextValidXmlWithXml = RsaCrypto.VerifyText(_testText, textSignatureWithXml, _publicKey);
+        bool isTextValidPemWithPem = RsaCrypto.VerifyText(_testText, textSignatureWithPem, convertedPublicKeyPem);
+
+        Assert.IsTrue(isValidXmlWithXml, "XML格式密钥签名应该有效");
+        Assert.IsTrue(isValidPemWithPem, "PEM格式密钥签名应该有效");
+        Assert.IsTrue(isTextValidXmlWithXml, "XML格式密钥文本签名应该有效");
+        Assert.IsTrue(isTextValidPemWithPem, "PEM格式密钥文本签名应该有效");
+
+        // 跨格式验证 - XML私钥签名可以用PEM公钥验证
+        bool isValidXmlWithPem = RsaCrypto.VerifyData(_testBytes, signatureWithXml, convertedPublicKeyPem);
+        bool isTextValidXmlWithPem = RsaCrypto.VerifyText(_testText, textSignatureWithXml, convertedPublicKeyPem);
+
+        // 跨格式验证 - PEM私钥签名可以用XML公钥验证
+        bool isValidPemWithXml = RsaCrypto.VerifyData(_testBytes, signatureWithPem, _publicKey);
+        bool isTextValidPemWithXml = RsaCrypto.VerifyText(_testText, textSignatureWithPem, _publicKey);
+
+        Assert.IsTrue(isValidXmlWithPem, "XML私钥签名可以用PEM公钥验证");
+        Assert.IsTrue(isTextValidXmlWithPem, "XML私钥文本签名可以用PEM公钥验证");
+        Assert.IsTrue(isValidPemWithXml, "PEM私钥签名可以用XML公钥验证");
+        Assert.IsTrue(isTextValidPemWithXml, "PEM私钥文本签名可以用XML公钥验证");
     }
     #endregion
 
