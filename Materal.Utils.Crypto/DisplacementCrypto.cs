@@ -1,5 +1,4 @@
-﻿using Materal.Extensions;
-using System.Text;
+﻿using System.Text;
 
 namespace Materal.Utils.Crypto;
 
@@ -29,7 +28,7 @@ public static partial class DisplacementCrypto
     /// <returns>加密后的字符串</returns>
     /// <exception cref="ArgumentNullException">输入字符串为null时抛出</exception>
     /// <exception cref="ArgumentException">输入字符串为空时抛出</exception>
-    /// <exception cref="ExtensionException">字符串包含不支持的字符时抛出</exception>
+    /// <exception cref="UtilException">字符串包含不支持的字符时抛出</exception>
     public static string Encrypt(string inputStr, int key = 3)
     {
         // 参数验证
@@ -73,7 +72,7 @@ public static partial class DisplacementCrypto
             }
             else
             {
-                throw new ExtensionException($"不支持的字符: '{c}'");
+                throw new UtilException($"不支持的字符: '{c}'");
             }
         }
 
@@ -88,7 +87,7 @@ public static partial class DisplacementCrypto
     /// <returns>解密后的字符串</returns>
     /// <exception cref="ArgumentNullException">输入字符串为null时抛出</exception>
     /// <exception cref="ArgumentException">输入字符串为空时抛出</exception>
-    /// <exception cref="ExtensionException">字符串包含不支持的字符时抛出</exception>
+    /// <exception cref="UtilException">字符串包含不支持的字符时抛出</exception>
     public static string Decrypt(string inputStr, int key = 3) => Encrypt(inputStr, -key);
 
     /// <summary>
@@ -101,7 +100,7 @@ public static partial class DisplacementCrypto
     /// <returns>位移后的字符</returns>
     private static char DisplaceChar(char c, int key, char[] alphabet, Dictionary<char, int> charMap)
     {
-        if (!charMap.TryGetValue(c, out int index)) throw new ExtensionException($"不支持的字符: '{c}'");
+        if (!charMap.TryGetValue(c, out int index)) throw new UtilException($"不支持的字符: '{c}'");
 
         int displacedIndex = (index + key) % alphabet.Length;
         if (displacedIndex < 0)

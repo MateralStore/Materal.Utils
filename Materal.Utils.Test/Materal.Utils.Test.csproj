@@ -14,7 +14,6 @@
 		<PackageReference Include="MSTest.TestFramework" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Materal.Test.Base\Materal.Test.Base\Materal.Test.Base.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.Crypto\Materal.Utils.Crypto.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.AutoMapper\Materal.Utils.AutoMapper.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.BarCode\Materal.Utils.BarCode.csproj" />
@@ -25,7 +24,6 @@
 	  <ProjectReference Include="..\Materal.Utils.Image\Materal.Utils.Image.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.MongoDB\Materal.Utils.MongoDB.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.Redis\Materal.Utils.Redis.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.Text\Materal.Utils.Text.csproj" />
 	  <ProjectReference Include="..\Materal.Utils.Wechat\Materal.Utils.Wechat.csproj" />
 	  <ProjectReference Include="..\Materal.Utils\Materal.Utils.csproj" />
 	</ItemGroup>

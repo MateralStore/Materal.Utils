@@ -35,7 +35,7 @@ namespace Materal.Utils.Wechat
         /// <exception cref="WechatException"></exception>
         public async Task SubscribeMessageSendAsync(SubscribeMessageSendRequestModel requestModel)
         {
-            requestModel.Validation();
+            ValidationHelper.Validate(requestModel);
             Dictionary<string, string> queryParams = new()
             {
                 {"access_token", requestModel.AccessToken}

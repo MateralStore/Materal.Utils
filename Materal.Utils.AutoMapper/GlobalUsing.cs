@@ -1,7 +1,7 @@
 ﻿global using Materal.Abstractions;
-global using Materal.Extensions;
+global using Materal.Utils.Extensions;
 global using Microsoft.Extensions.DependencyInjection;
-global using System.ComponentModel;
-global using System.Linq.Expressions;
 global using System.Reflection;
-global using System.Text;
+global using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Materal.Utils.Test")]

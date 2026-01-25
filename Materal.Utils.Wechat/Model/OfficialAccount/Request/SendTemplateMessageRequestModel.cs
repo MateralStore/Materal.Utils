@@ -1,4 +1,6 @@
-﻿namespace Materal.Utils.Wechat.Model.OfficialAccount.Request
+﻿using Materal.Utils.Models;
+
+namespace Materal.Utils.Wechat.Model.OfficialAccount.Request
 {
     /// <summary>
     /// 发送模版消息请求模型

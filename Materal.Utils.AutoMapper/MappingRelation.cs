@@ -43,8 +43,19 @@
         /// <param name="useDefaultMapper"></param>
         public MappingRelation(Action<IMapper, T1, T2> map, bool useDefaultMapper)
         {
-            Map = map;
             UseDefaultMapper = useDefaultMapper;
+            if (useDefaultMapper)
+            {
+                Map = (mapper, source, target) =>
+                {
+                    mapper.Map(source!, target!);
+                    map(mapper, source, target);
+                };
+            }
+            else
+            {
+                Map = map;
+            }
             MapObj = (mapper, source, target) => Map(mapper, (T1)source, (T2)target!);
         }
     }

@@ -12,7 +12,6 @@
         /// <returns></returns>
         public static IServiceCollection AddMateralConsulUtils(this IServiceCollection services)
         {
-            services.AddMateralUtils();
             services.TryAddSingleton<IConsulService, ConsulServiceImpl>();
             return services;
         }

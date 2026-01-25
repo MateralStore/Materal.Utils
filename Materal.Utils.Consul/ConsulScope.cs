@@ -1,7 +1,7 @@
 ﻿using Consul;
 using Materal.Utils.Consul.ConfigModels;
 using Materal.Utils.Consul.Models;
-using Materal.Utils.Http;
+using Materal.Utils.Network.Http;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -173,11 +173,11 @@ namespace Materal.Utils.Consul
             if (jsonDocument.RootElement.ValueKind != JsonValueKind.Object) throw new MateralException("ConsulServices返回错误");
             JsonElement.ObjectEnumerator element = jsonDocument.RootElement.EnumerateObject();
             List<JsonProperty> jsonProperties = [.. element];
-            List<string> jsonTexts = jsonProperties.Select(jsonProperty => jsonProperty.Value.ToString()).ToList();
-            List<ConsulServiceModel> result = jsonTexts.Select(jsonText => jsonText.JsonToObject<ConsulServiceModel>()).ToList();
+            List<string> jsonTexts = [.. jsonProperties.Select(jsonProperty => jsonProperty.Value.ToString())];
+            List<ConsulServiceModel> result = [.. jsonTexts.Select(jsonText => jsonText.JsonToObject<ConsulServiceModel>())];
             if (filter is not null)
             {
-                result = result.Where(filter).ToList();
+                result = [.. result.Where(filter)];
             }
             return result;
         }

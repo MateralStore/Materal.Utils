@@ -1,4 +1,6 @@
-﻿namespace Materal.Utils.Consul.ConfigModels
+﻿using Materal.Utils.Network.Http;
+
+namespace Materal.Utils.Consul.ConfigModels
 {
     /// <summary>
     /// 健康检查配置模型

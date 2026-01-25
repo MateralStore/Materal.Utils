@@ -45,7 +45,7 @@ namespace Materal.Utils.Wechat
         {
             // 文档地址：https://mp.weixin.qq.com/debug/cgi-bin/readtmpl?t=tmplmsg/faq_tmpl
             // 请求方式：POST https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN
-            requestModel.Validation();
+            ValidationHelper.Validate(requestModel);
             Dictionary<string, string> queryParams = new()
             {
                 {"access_token", requestModel.AccessToken}

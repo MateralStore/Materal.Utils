@@ -69,7 +69,7 @@ namespace Materal.Utils.AutoMapper
             ILGenerator ilGenerator = dynamicMethod.GetILGenerator();
             foreach (PropertyInfo sourcePropertyInfo in sourceType.GetProperties())
             {
-                if (!sourcePropertyInfo.CanRead) continue;
+                if (!sourcePropertyInfo.CanRead || !sourcePropertyInfo.CanWrite) continue;
                 PropertyInfo? targetPropertyInfo = targetType.GetProperty(sourcePropertyInfo.Name);
                 if (targetPropertyInfo is null || !targetPropertyInfo.CanWrite) continue;
                 MethodInfo? getMethod = sourcePropertyInfo.GetGetMethod();
@@ -108,6 +108,10 @@ namespace Materal.Utils.AutoMapper
         private void WriteILTheInvokeMapper(ILGenerator ilGenerator, PropertyInfo sourcePropertyInfo, PropertyInfo targetPropertyInfo)
         {
             /*            
+            if(source.Sub is null)
+            {
+                return;
+            }
             if(target.Sub is null)
             {
                 target.Sub = mapper.Map<SubC>(source.Sub);
@@ -118,38 +122,49 @@ namespace Materal.Utils.AutoMapper
             }
             */
             // 定义当前块所需的局部变量和标签
+            LocalBuilder sourceValueLocalBuilder = ilGenerator.DeclareLocal(sourcePropertyInfo.PropertyType);// 用于存储source.Sub
             LocalBuilder isNullLocalBuilder = ilGenerator.DeclareLocal(typeof(bool));// 用于映射块的null判断
+            Label sourceNullLabel = ilGenerator.DefineLabel();// source.Sub为null的标签
             Label elseLabel = ilGenerator.DefineLabel();// 映射块else分支
             Label endLabel = ilGenerator.DefineLabel(); // 映射块结束
+            MethodInfo sourceGetMethod = sourcePropertyInfo.GetGetMethod()!;
+            MethodInfo targetGetMethod = targetPropertyInfo.GetGetMethod()!;
+            // 获取并存储source.Sub
+            ilGenerator.Emit(OpCodes.Ldarg_0);// source
+            ilGenerator.Emit(OpCodes.Callvirt, sourceGetMethod);// 获取source.Sub
+            ilGenerator.Emit(OpCodes.Stloc, sourceValueLocalBuilder);// 存储到局部变量
+            // 判断source.Sub是否为null
+            ilGenerator.Emit(OpCodes.Ldloc, sourceValueLocalBuilder);
+            ilGenerator.Emit(OpCodes.Ldnull);
+            ilGenerator.Emit(OpCodes.Ceq);
+            ilGenerator.Emit(OpCodes.Brtrue_S, sourceNullLabel);// 如果为null则跳到结束
             // 判断target.Sub是否为null
             ilGenerator.Emit(OpCodes.Ldarg_1);// target
-            MethodInfo targetGetMethod = targetPropertyInfo.GetGetMethod()!;
             ilGenerator.Emit(OpCodes.Callvirt, targetGetMethod);// 获取target.Sub
             ilGenerator.Emit(OpCodes.Ldnull);
             ilGenerator.Emit(OpCodes.Ceq);// 比较是否为null
             ilGenerator.Emit(OpCodes.Stloc, isNullLocalBuilder);// 存储结果到当前块局部变量
             ilGenerator.Emit(OpCodes.Ldloc, isNullLocalBuilder);// 加载判断结果
             ilGenerator.Emit(OpCodes.Brfalse_S, elseLabel);// 不为null则跳else
-            // if分支 (target.Sub == null)
+            // if分支 (target.Sub == null && source.Sub != null)
             ilGenerator.Emit(OpCodes.Ldarg_1);// target
             ilGenerator.Emit(OpCodes.Ldarg_2);// mapper
-            ilGenerator.Emit(OpCodes.Ldarg_0);// source
-            MethodInfo sourceGetMethod = sourcePropertyInfo.GetGetMethod()!;
-            ilGenerator.Emit(OpCodes.Callvirt, sourceGetMethod);// 获取source.Sub
+            ilGenerator.Emit(OpCodes.Ldloc, sourceValueLocalBuilder);// 加载source.Sub
             // 调用泛型Map<SubModelC>
             MethodInfo mapperGenericMethod = _mapperGenericMethod.MakeGenericMethod(targetPropertyInfo.PropertyType);
             ilGenerator.Emit(OpCodes.Callvirt, mapperGenericMethod);
             MethodInfo targetSetMethod = targetPropertyInfo.GetSetMethod()!;
             ilGenerator.Emit(OpCodes.Callvirt, targetSetMethod);// 赋值给target.Sub
             ilGenerator.Emit(OpCodes.Br_S, endLabel);// 跳转到块结束
-            // else分支 (target.Sub != null)
+            // else分支 (target.Sub != null && source.Sub != null)
             ilGenerator.MarkLabel(elseLabel);
             ilGenerator.Emit(OpCodes.Ldarg_2);// mapper
-            ilGenerator.Emit(OpCodes.Ldarg_0);// source
-            ilGenerator.Emit(OpCodes.Callvirt, sourceGetMethod);// source.Sub
+            ilGenerator.Emit(OpCodes.Ldloc, sourceValueLocalBuilder);// 加载source.Sub
             ilGenerator.Emit(OpCodes.Ldarg_1);// target
             ilGenerator.Emit(OpCodes.Callvirt, targetGetMethod);// target.Sub
             ilGenerator.Emit(OpCodes.Callvirt, _mapperMethod);// 映射到已有对象
+            // source.Sub为null的标签
+            ilGenerator.MarkLabel(sourceNullLabel);
             // 映射块结束
             ilGenerator.MarkLabel(endLabel);
         }
@@ -180,7 +195,7 @@ namespace Materal.Utils.AutoMapper
             // 加载本地变量的地址到计算堆栈
             ilGenerator.Emit(OpCodes.Ldloca_S, localBuilder);
             // 调用Source的get_HasValue方法
-            MethodInfo getHasValueMethod = sourcePropertyInfo.PropertyType.GetProperty(nameof(Nullable<int>.HasValue))?.GetGetMethod() ?? throw new Exception("获取HasValue失败");
+            MethodInfo getHasValueMethod = sourcePropertyInfo.PropertyType.GetProperty(nameof(Nullable<>.HasValue))?.GetGetMethod() ?? throw new Exception("获取HasValue失败");
             ilGenerator.Emit(OpCodes.Call, getHasValueMethod);
             // 如果get_HasValue返回false，跳转到指定标签
             Label hasValueFalseLabel = ilGenerator.DefineLabel();
@@ -195,7 +210,7 @@ namespace Materal.Utils.AutoMapper
             // 加载本地变量的地址到计算堆栈
             ilGenerator.Emit(OpCodes.Ldloca_S, localBuilder);
             // 调用Source的get_Value方法
-            MethodInfo getValueMethod = sourcePropertyInfo.PropertyType.GetProperty(nameof(Nullable<int>.Value))?.GetGetMethod() ?? throw new Exception("获取Value失败");
+            MethodInfo getValueMethod = sourcePropertyInfo.PropertyType.GetProperty(nameof(Nullable<>.Value))?.GetGetMethod() ?? throw new Exception("获取Value失败");
             ilGenerator.Emit(OpCodes.Call, getValueMethod);
             // 调用AClass的set_Age方法
             ilGenerator.Emit(OpCodes.Callvirt, setMethod);

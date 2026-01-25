@@ -1,4 +1,5 @@
-﻿using Materal.Utils.Wechat.Model;
+﻿using Materal.Utils.Helpers;
+using Materal.Utils.Wechat.Model;
 using System.Reflection;
 using System.Security.Cryptography;
 
@@ -87,7 +88,7 @@ public class WechatOffcialAccountServerHelper(string token, IServiceProvider ser
             if (eventNodes is not null && eventNodes.Count > 0)
             {
                 eventNode = eventNodes[0] ?? throw new WechatException("获取Event节点失败");
-                return eventNode.FirstChild?.Value?.FirstUpper() ?? throw new WechatException("获取Event节点值失败");
+                return eventNode.FirstChild?.Value?.ToUpperFirstLetter() ?? throw new WechatException("获取Event节点值失败");
             }
             eventNodes = xmlDocument.FirstChild.SelectNodes("MsgId");
             if (eventNodes is not null && eventNodes.Count > 0)

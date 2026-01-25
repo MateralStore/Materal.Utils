@@ -1,5 +1,4 @@
-﻿using Materal.Utils.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Materal.Utils.Email;
@@ -16,7 +15,6 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddMateralEmailUtils(this IServiceCollection services)
     {
-        services.AddMateralUtils();
         services.TryAddSingleton<IEmailService, EmailService>();
         return services;
     }

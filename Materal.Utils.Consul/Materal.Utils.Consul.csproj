@@ -10,6 +10,6 @@
 	  <PackageReference Include="Polly" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Materal.Utils\Materal.Utils.csproj" />
+	  <ProjectReference Include="..\Materal.Utils.Network\Materal.Utils.Network.csproj" />
 	</ItemGroup>
 </Project>

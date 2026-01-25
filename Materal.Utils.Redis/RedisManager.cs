@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Materal.Utils.Enums;
+using StackExchange.Redis;
 using System.Text;
 
 namespace Materal.Utils.Redis
@@ -49,7 +50,7 @@ namespace Materal.Utils.Redis
         public async Task HashSetAsync(string collectionName, ICollection<HashValue<object>> hashValues)
         {
             IDatabase database = GetDB(collectionName);
-            HashEntry[] hashEntries = hashValues.Select(m => new HashEntry(m.Key, ObjectToRedisValue(m.Value))).ToArray();
+            HashEntry[] hashEntries = [.. hashValues.Select(m => new HashEntry(m.Key, ObjectToRedisValue(m.Value)))];
             await database.HashSetAsync(collectionName, hashEntries);
         }
         /// <summary>
@@ -75,11 +76,11 @@ namespace Materal.Utils.Redis
         {
             IDatabase database = GetDB(collectionName);
             HashEntry[] hashEntries = await database.HashGetAllAsync(collectionName);
-            return hashEntries.Select(hashEntry => new HashValue<T>
+            return [.. hashEntries.Select(hashEntry => new HashValue<T>
             {
                 Key = hashEntry.Name,
                 Value = RedisValueToObject<T>(hashEntry.Value)
-            }).ToArray();
+            })];
         }
         /// <summary>
         /// 移除Hash值
@@ -90,7 +91,7 @@ namespace Materal.Utils.Redis
         public async Task<long> HashDeleteAsync(string collectionName, ICollection<string> keys)
         {
             IDatabase database = GetDB(collectionName);
-            RedisValue[] redisValues = keys.Select(m => new RedisValue(m)).ToArray();
+            RedisValue[] redisValues = [.. keys.Select(m => new RedisValue(m))];
             return await database.HashDeleteAsync(collectionName, redisValues);
         }
         /// <summary>
@@ -176,7 +177,7 @@ namespace Materal.Utils.Redis
         {
             IDatabase database = GetDB(collectionName);
             RedisValue[] redisValues = await database.HashKeysAsync(collectionName);
-            return redisValues.Select(m => m.ToString()).ToArray();
+            return [.. redisValues.Select(m => m.ToString())];
         }
         /// <summary>
         /// Hash值长度
@@ -376,7 +377,7 @@ namespace Materal.Utils.Redis
         {
             IDatabase database = GetDB(collectionName);
             RedisValue[] redisValues = await database.ListRangeAsync(collectionName, startIndex, endIndex);
-            return redisValues.Select(RedisValueToObject<T>).ToArray();
+            return [.. redisValues.Select(RedisValueToObject<T>)];
         }
         /// <summary>
         /// 获取List所有数据
@@ -588,7 +589,7 @@ namespace Materal.Utils.Redis
         /// <returns></returns>
         public async Task<bool> SetExpiryAsync(string collectionName, int hours)
         {
-            return await SetExpiryAsync(collectionName, hours, DateTimeUnitEnum.HourUnit);
+            return await SetExpiryAsync(collectionName, hours, DateTimeUnit.HourUnit);
         }
         /// <summary>
         /// 设置String值
@@ -597,7 +598,7 @@ namespace Materal.Utils.Redis
         /// <param name="timeValue">时间点</param>
         /// <param name="dateTimeType"></param>
         /// <returns></returns>
-        public async Task<bool> SetExpiryAsync(string collectionName, int timeValue, DateTimeUnitEnum dateTimeType)
+        public async Task<bool> SetExpiryAsync(string collectionName, int timeValue, DateTimeUnit dateTimeType)
         {
             long milliseconds = Convert.ToInt64(DateTimeHelper.ToMilliseconds(timeValue, dateTimeType));
             TimeSpan expiry = new(milliseconds * 10000);
@@ -644,7 +645,7 @@ namespace Materal.Utils.Redis
         /// <param name="timeout">过期时间</param>
         /// <param name="timeoutType"></param>
         /// <returns></returns>
-        public async Task<RedisLock> GetBlockingLockAsync(string key, int timeout, DateTimeUnitEnum timeoutType)
+        public async Task<RedisLock> GetBlockingLockAsync(string key, int timeout, DateTimeUnit timeoutType)
         {
             long milliseconds = Convert.ToInt64(DateTimeHelper.ToMilliseconds(timeout, timeoutType));
             TimeSpan expiry = new(milliseconds * 10000);
@@ -658,7 +659,7 @@ namespace Materal.Utils.Redis
         /// <returns></returns>
         public async Task<RedisLock> GetBlockingLockAsync(string key, int timeout)
         {
-            return await GetBlockingLockAsync(key, timeout, DateTimeUnitEnum.MillisecondUnit);
+            return await GetBlockingLockAsync(key, timeout, DateTimeUnit.MillisecondUnit);
         }
         #endregion
         #region 非阻塞锁
@@ -694,7 +695,7 @@ namespace Materal.Utils.Redis
         /// <param name="timeout">过期时间</param>
         /// <param name="timeoutType"></param>
         /// <returns></returns>
-        public async Task<RedisLock?> GetNonBlockingLockAsync(string key, int timeout, DateTimeUnitEnum timeoutType)
+        public async Task<RedisLock?> GetNonBlockingLockAsync(string key, int timeout, DateTimeUnit timeoutType)
         {
             long milliseconds = Convert.ToInt64(DateTimeHelper.ToMilliseconds(timeout, timeoutType));
             TimeSpan expiry = new(milliseconds * 10000);
@@ -708,7 +709,7 @@ namespace Materal.Utils.Redis
         /// <returns></returns>
         public async Task<RedisLock?> GetNonBlockingLockAsync(string key, int timeout)
         {
-            return await GetNonBlockingLockAsync(key, timeout, DateTimeUnitEnum.MillisecondUnit);
+            return await GetNonBlockingLockAsync(key, timeout, DateTimeUnit.MillisecondUnit);
         }
         #endregion
         #region 私有方法

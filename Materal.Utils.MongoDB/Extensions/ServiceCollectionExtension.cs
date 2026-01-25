@@ -1,21 +1,20 @@
-﻿namespace Materal.Utils.MongoDB.Extensions
+﻿namespace Materal.Utils.MongoDB.Extensions;
+
+/// <summary>
+/// ServiceCollection扩展
+/// </summary>
+public static class ServiceCollectionExtension
 {
     /// <summary>
-    /// ServiceCollection扩展
+    /// 添加Mongo工具
     /// </summary>
-    public static class ServiceCollectionExtension
+    /// <param name="services"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddMongoUtils(this IServiceCollection services)
     {
-        /// <summary>
-        /// 添加Mongo工具
-        /// </summary>
-        /// <param name="services"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddMongoUtils(this IServiceCollection services)
-        {
-            services.TryAddScoped<IMongoRepository, MongoRepository>();
-            services.TryAddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
-            services.TryAddScoped(typeof(IMongoRepository<,>), typeof(MongoRepository<,>));
-            return services;
-        }
+        services.TryAddScoped<IMongoRepository, MongoRepository>();
+        services.TryAddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+        services.TryAddScoped(typeof(IMongoRepository<,>), typeof(MongoRepository<,>));
+        return services;
     }
 }

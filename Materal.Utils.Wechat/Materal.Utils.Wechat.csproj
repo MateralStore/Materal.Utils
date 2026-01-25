@@ -8,10 +8,11 @@
 	<ItemGroup>
 	  <PackageReference Include="LitJson" />
 	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Materal.Utils.Network\Materal.Utils.Network.csproj" />
+	  <ProjectReference Include="..\Materal.Utils.Validation\Materal.Utils.Validation.csproj" />
+	</ItemGroup>
 	<!--<ItemGroup>
 	  <PackageReference Include="LitJson" />
 	</ItemGroup>-->
-	<ItemGroup>
-		<ProjectReference Include="..\Materal.Utils\Materal.Utils.csproj" />
-	</ItemGroup>
 </Project>

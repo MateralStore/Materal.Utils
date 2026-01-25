@@ -344,6 +344,7 @@ public class AesFileCryptoTest
         Assert.AreNotEqual(File.ReadAllBytes(inputFile), File.ReadAllBytes(encryptedFile));
 
         // 解密文件
+        encryptedFileInfo.Refresh();
         FileInfo decryptedFileInfo = new(decryptedFile);
         AesCrypto.GCMDecryptFile(encryptedFileInfo, decryptedFileInfo, key);
 

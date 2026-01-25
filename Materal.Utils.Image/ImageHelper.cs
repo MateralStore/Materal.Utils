@@ -1,4 +1,4 @@
-﻿using Materal.Extensions;
+﻿using Materal.Utils.Helpers;
 using SkiaSharp;
 
 namespace Materal.Utils.Image
@@ -335,12 +335,12 @@ namespace Materal.Utils.Image
             {
                 proportion = 50;
             }
-            int newWidth = (width * proportion).ConvertTo<int>();
+            int newWidth = ConvertHelper.ConvertTo<int>(width * proportion);
             if (newWidth <= 0)
             {
                 newWidth = 1;
             }
-            int newHeight = (height * proportion).ConvertTo<int>();
+            int newHeight = ConvertHelper.ConvertTo<int>(height * proportion);
             if (newHeight <= 0)
             {
                 newHeight = 1;

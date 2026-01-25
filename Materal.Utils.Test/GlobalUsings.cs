@@ -1,11 +1,8 @@
-﻿global using Materal.Abstractions;
-global using Materal.Extensions;
-global using Materal.Extensions.ValidationAttributes;
-global using Materal.Test.Base;
-global using Materal.Utils.Model;
+global using Materal.Abstractions;
+global using Materal.Utils.AutoMapper;
+global using Materal.Utils.BarCode;
+global using Materal.Utils.Enums;
+global using Materal.Utils.Extensions;
 global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
-global using System.ComponentModel.DataAnnotations;
-global using System.Linq.Expressions;
 global using System.Text;

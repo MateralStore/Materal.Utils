@@ -1,5 +1,4 @@
 using Materal.Utils.Crypto;
-using Materal.Extensions;
 
 namespace Materal.Utils.Test.CryptoTest;
 
@@ -289,7 +288,7 @@ public class DisplacementCryptoTest
         string stringWithUnsupportedChars = "HELLO中文";
 
         // Act & Assert
-        Assert.ThrowsExactly<ExtensionException>(() => DisplacementCrypto.Encrypt(stringWithUnsupportedChars));
+        Assert.ThrowsExactly<UtilException>(() => DisplacementCrypto.Encrypt(stringWithUnsupportedChars));
     }
 
     /// <summary>

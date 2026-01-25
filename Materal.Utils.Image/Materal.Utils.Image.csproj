@@ -9,6 +9,6 @@
 	  <PackageReference Include="SkiaSharp" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\Materal.Extensions\Materal.Extensions\Materal.Extensions.csproj" />
+	  <ProjectReference Include="..\Materal.Utils\Materal.Utils.csproj" />
 	</ItemGroup>
 </Project>
