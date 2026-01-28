@@ -1,30 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSTest.Sdk/4.0.1">
 	<Import Project="../../Common.props" />
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-		<IsTestProject>true</IsTestProject>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="coverlet.collector">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" />
-		<PackageReference Include="MSTest.TestAdapter" />
-		<PackageReference Include="MSTest.TestFramework" />
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\Materal.Utils.Crypto\Materal.Utils.Crypto.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.AutoMapper\Materal.Utils.AutoMapper.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.BarCode\Materal.Utils.BarCode.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.CloudStorage.Tencent\Materal.Utils.CloudStorage.Tencent.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.Consul\Materal.Utils.Consul.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.Email\Materal.Utils.Email.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.Excel\Materal.Utils.Excel.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.Image\Materal.Utils.Image.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.MongoDB\Materal.Utils.MongoDB.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.Redis\Materal.Utils.Redis.csproj" />
-	  <ProjectReference Include="..\Materal.Utils.Wechat\Materal.Utils.Wechat.csproj" />
-	  <ProjectReference Include="..\Materal.Utils\Materal.Utils.csproj" />
+		<ProjectReference Include="..\Materal.Utils.Crypto\Materal.Utils.Crypto.csproj" />
+		<ProjectReference Include="..\Materal.Utils.AutoMapper\Materal.Utils.AutoMapper.csproj" />
+		<ProjectReference Include="..\Materal.Utils.BarCode\Materal.Utils.BarCode.csproj" />
+		<ProjectReference Include="..\Materal.Utils.CloudStorage.Tencent\Materal.Utils.CloudStorage.Tencent.csproj" />
+		<ProjectReference Include="..\Materal.Utils.Consul\Materal.Utils.Consul.csproj" />
+		<ProjectReference Include="..\Materal.Utils.Email\Materal.Utils.Email.csproj" />
+		<ProjectReference Include="..\Materal.Utils.Excel\Materal.Utils.Excel.csproj" />
+		<ProjectReference Include="..\Materal.Utils.Image\Materal.Utils.Image.csproj" />
+		<ProjectReference Include="..\Materal.Utils.MongoDB\Materal.Utils.MongoDB.csproj" />
+		<ProjectReference Include="..\Materal.Utils.Redis\Materal.Utils.Redis.csproj" />
+		<ProjectReference Include="..\Materal.Utils.Wechat\Materal.Utils.Wechat.csproj" />
+		<ProjectReference Include="..\Materal.Utils\Materal.Utils.csproj" />
 	</ItemGroup>
 </Project>
