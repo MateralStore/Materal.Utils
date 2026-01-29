@@ -87,7 +87,7 @@ public class FilterModel
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public Func<T, object>? GetSortDlegate<T>()
+    public Func<T, object>? GetSortDelegate<T>()
     {
         Expression<Func<T, object>>? searchExpression = GetSortExpression<T>();
         Func<T, object>? result = searchExpression?.Compile();
@@ -101,7 +101,7 @@ public class FilterModel
     /// <param name="defaultOrderExpression"></param>
     /// <param name="defaultIsAsc"></param>
     /// <returns></returns>
-    public IQueryable<T> SetSortExpresssion<T>(IQueryable<T> values, Expression<Func<T, object>>? defaultOrderExpression = null, bool? defaultIsAsc = null)
+    public IQueryable<T> SetSortExpression<T>(IQueryable<T> values, Expression<Func<T, object>>? defaultOrderExpression = null, bool? defaultIsAsc = null)
     {
         IQueryable<T> result = values;
         bool isAsc = IsAsc;
@@ -134,7 +134,7 @@ public class FilterModel
     {
         List<T> result = [.. values];
         bool isAsc = IsAsc;
-        Func<T, object>? sortDlegate = GetSortDlegate<T>();
+        Func<T, object>? sortDlegate = GetSortDelegate<T>();
         if (sortDlegate is null)
         {
             if (defaultOrderExpression is null) return result;

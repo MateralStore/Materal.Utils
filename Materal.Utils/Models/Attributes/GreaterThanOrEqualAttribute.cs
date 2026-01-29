@@ -1,20 +1,62 @@
 ﻿namespace Materal.Utils.Models.Attributes;
 
 /// <summary>
-/// 大于等于
+/// 大于等于过滤特性
+/// 用于在动态查询中生成大于等于比较（&gt;=）条件的表达式树
 /// </summary>
+/// <remarks>
+/// <para><b>功能说明：</b></para>
+/// <para>
+/// 该特性继承自 <see cref="FilterAttribute"/>，用于标记过滤模型（<see cref="FilterModel"/>）的属性。
+/// 当调用 <see cref="FilterModel.GetSearchExpression{T}"/> 方法时，会自动为标记了此特性的属性生成大于等于比较查询条件。
+/// </para>
+/// <para><b>工作原理：</b></para>
+/// <para>
+/// 生成类似 <c>m => m.TargetProperty &gt;= filterValue</c> 的表达式树，用于范围查询的下限（包含边界值）。
+/// </para>
+/// <para><b>典型使用场景：</b></para>
+/// <list type="bullet">
+/// <item><description>数值范围查询：查找大于等于某个数值的记录（如最低价格、最小库存）</description></item>
+/// <item><description>时间范围查询：查找从某个时间点开始的记录（包含该时间点）</description></item>
+/// <item><description>最小值过滤：设置各种指标的最小阈值</description></item>
+/// <item><description>起始日期查询：查找指定日期及之后的数据</description></item>
+/// </list>
+/// <para><b>支持的数据类型：</b></para>
+/// <list type="bullet">
+/// <item><description>数值类型：int、long、decimal、double、float 等</description></item>
+/// <item><description>日期时间类型：DateTime、DateTimeOffset 等</description></item>
+/// <item><description>可空类型：int?、DateTime? 等</description></item>
+/// <item><description>其他实现了比较接口的类型</description></item>
+/// </list>
+/// <para><b>使用示例：</b></para>
+/// <code>
+/// public class OrderFilterModel : FilterModel
+/// {
+///     // 查找订单金额大于等于指定值的订单
+///     [GreaterThanOrEqual]
+///     public decimal? MinAmount { get; set; }
+///     
+///     // 查找指定日期及之后创建的订单
+///     [GreaterThanOrEqual(targetPropertyName: "CreateTime")]
+///     public DateTime? StartDate { get; set; }
+/// }
+/// 
+/// var filter = new OrderFilterModel { StartDate = new DateTime(2024, 1, 1) };
+/// // 生成表达式：m => m.CreateTime &gt;= new DateTime(2024, 1, 1)
+/// var expression = filter.GetSearchExpression&lt;Order&gt;();
+/// </code>
+/// <para><b>注意事项：</b></para>
+/// <list type="bullet">
+/// <item><description>包含边界值，与 <see cref="GreaterThanAttribute"/> 的区别在于包含等于的情况</description></item>
+/// <item><description>对于可空类型，会自动处理 HasValue 检查</description></item>
+/// <item><description>如果过滤属性值为 null 或空字符串，该条件会被忽略</description></item>
+/// <item><description>常与 <see cref="LessThanOrEqualAttribute"/> 配合使用实现闭区间范围查询</description></item>
+/// </list>
+/// </remarks>
 [AttributeUsage(AttributeTargets.Property)]
 public class GreaterThanOrEqualAttribute(string? targetPropertyName = null) : FilterAttribute(targetPropertyName)
 {
-    /// <summary>
     /// <inheritdoc/>
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="parameterExpression"></param>
-    /// <param name="propertyInfo"></param>
-    /// <param name="value"></param>
-    /// <param name="targetPropertyInfo"></param>
-    /// <returns></returns>
     public override Expression? GetSearchExpression<T>(ParameterExpression parameterExpression, PropertyInfo propertyInfo, T value, PropertyInfo targetPropertyInfo)
     {
         return GetSearchExpression(parameterExpression, propertyInfo, value, targetPropertyInfo, Expression.GreaterThanOrEqual);
