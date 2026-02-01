@@ -19,5 +19,5 @@ public enum ResultType
     /// 警告
     /// </summary>
     [Description("警告")]
-    Waring = 2
+    Warning = 2
 }

@@ -48,7 +48,7 @@ public class EnumHelperTest
         ResultType result = EnumHelper.ConvertToEnumByDescription<ResultType>("警告");
 
         // Assert
-        Assert.AreEqual(ResultType.Waring, result);
+        Assert.AreEqual(ResultType.Warning, result);
     }
 
     /// <summary>

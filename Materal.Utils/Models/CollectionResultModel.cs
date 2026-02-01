@@ -114,7 +114,7 @@ public class CollectionResultModel<T> : ResultModel
     /// <param name="message">返回消息</param>
     /// <returns></returns>
     public static CollectionResultModel<T> Waring(ICollection<T> data, PageModel pageModel, string? message = null)
-        => new(ResultType.Waring, data, pageModel, message);
+        => new(ResultType.Warning, data, pageModel, message);
     /// <summary>
     /// 警告
     /// </summary>
@@ -124,7 +124,7 @@ public class CollectionResultModel<T> : ResultModel
     /// <param name="message">返回消息</param>
     /// <returns></returns>
     public static CollectionResultModel<T> Waring(ICollection<T> data, PageRequestModel rangeRequestModel, int dataCount, string? message = null)
-        => new(ResultType.Waring, data, new PageModel(rangeRequestModel, dataCount), message);
+        => new(ResultType.Warning, data, new PageModel(rangeRequestModel, dataCount), message);
     /// <summary>
     /// 成功
     /// </summary>
@@ -177,7 +177,7 @@ public class CollectionResultModel<T> : ResultModel
     /// <param name="message">返回消息</param>
     /// <returns></returns>
     public static CollectionResultModel<T> Waring(ICollection<T> data, RangeModel pageModel, string? message = null)
-        => new(ResultType.Waring, data, pageModel, message);
+        => new(ResultType.Warning, data, pageModel, message);
     /// <summary>
     /// 警告
     /// </summary>
@@ -187,5 +187,5 @@ public class CollectionResultModel<T> : ResultModel
     /// <param name="message">返回消息</param>
     /// <returns></returns>
     public static CollectionResultModel<T> Waring(ICollection<T> data, RangeRequestModel rangeRequestModel, int dataCount, string? message = null)
-        => new(ResultType.Waring, data, new RangeModel(rangeRequestModel, dataCount), message);
+        => new(ResultType.Warning, data, new RangeModel(rangeRequestModel, dataCount), message);
 }

@@ -53,7 +53,7 @@ public class ResultModel
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>
-    public static ResultModel Waring(string? message = null) => new(ResultType.Waring, message);
+    public static ResultModel Warning(string? message = null) => new(ResultType.Warning, message);
 }
 /// <summary>
 /// 返回模型
@@ -108,11 +108,11 @@ public class ResultModel<T> : ResultModel
     /// <param name="data">返回数据对象</param>
     /// <param name="message">返回消息</param>
     /// <returns>警告返回对象</returns>
-    public static ResultModel<T> Waring(T data, string? message = null) => new(ResultType.Waring, data, message);
+    public static ResultModel<T> Warning(T data, string? message = null) => new(ResultType.Warning, data, message);
     /// <summary>
     /// 获得一个警告返回对象
     /// </summary>
     /// <param name="message">返回消息</param>
     /// <returns>警告返回对象</returns>
-    public new static ResultModel<T> Waring(string? message = null) => new(ResultType.Waring, default, message);
+    public new static ResultModel<T> Warning(string? message = null) => new(ResultType.Warning, default, message);
 }
