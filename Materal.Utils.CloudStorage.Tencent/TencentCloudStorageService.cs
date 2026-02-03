@@ -134,7 +134,7 @@ namespace Materal.Utils.CloudStorage.Tencent
             uploadTask.SetSrcPath(savePath);
             if (_eventManager is not null)
             {
-                uploadTask.progressCallback = _eventManager.UploadObjecttProgress;
+                uploadTask.progressCallback = _eventManager.UploadObjectProgress;
                 uploadTask.successCallback = _eventManager.UploadObjectSuccess;
                 uploadTask.failCallback = _eventManager.UploadObjectFail;
             }

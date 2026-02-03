@@ -18,7 +18,7 @@ namespace Materal.Utils.CloudStorage.Tencent
         /// </summary>
         /// <param name="completed"></param>
         /// <param name="total"></param>
-        void UploadObjecttProgress(long completed, long total);
+        void UploadObjectProgress(long completed, long total);
         /// <summary>
         /// 下载文件成功
         /// </summary>
