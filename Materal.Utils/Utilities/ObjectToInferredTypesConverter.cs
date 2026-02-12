@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Utilities;
+namespace Materal.Utils.Utilities;
 
 /// <summary>
 /// 支持任意类型的 JSON 转换器，自动保留和还原类型信息

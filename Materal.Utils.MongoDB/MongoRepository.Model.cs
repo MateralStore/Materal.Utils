@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Models;
+using Materal.Utils.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;

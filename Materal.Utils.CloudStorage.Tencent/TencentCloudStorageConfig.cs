@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.CloudStorage.Tencent
+namespace Materal.Utils.CloudStorage.Tencent
 {
     /// <summary>
     /// 腾讯云配置

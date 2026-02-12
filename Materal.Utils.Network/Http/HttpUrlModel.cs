@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Network.Http;
+namespace Materal.Utils.Network.Http;
 
 /// <summary>
 /// HttpUrl模型

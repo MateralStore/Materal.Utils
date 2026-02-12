@@ -1,4 +1,4 @@
-﻿using COSXML;
+using COSXML;
 using COSXML.Auth;
 using COSXML.Model.Object;
 using COSXML.Transfer;

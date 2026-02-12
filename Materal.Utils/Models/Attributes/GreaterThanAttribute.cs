@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Models.Attributes;
+namespace Materal.Utils.Models.Attributes;
 
 /// <summary>
 /// 大于过滤特性

@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Windows
+namespace Materal.Utils.Windows
 {
     /// <summary>
     /// 注册表管理器

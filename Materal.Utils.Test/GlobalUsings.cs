@@ -1,4 +1,4 @@
-global using Materal.Abstractions;
+﻿global using Materal.Abstractions;
 global using Materal.Utils.AutoMapper;
 global using Materal.Utils.BarCode;
 global using Materal.Utils.Enums;

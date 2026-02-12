@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Logging;
 using System.Text.Json.Nodes;
 

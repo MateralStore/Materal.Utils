@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.CloudStorage.Tencent.Models
+namespace Materal.Utils.CloudStorage.Tencent.Models
 {
     /// <summary>
     /// 临时秘钥

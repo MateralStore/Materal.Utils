@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.MongoDB;
+namespace Materal.Utils.MongoDB;
 
 public partial interface IMongoRepository<T>
 {

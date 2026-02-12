@@ -1,4 +1,4 @@
-﻿using COSXML.Model;
+using COSXML.Model;
 using COSXML.Transfer;
 
 namespace Materal.Utils.CloudStorage.Tencent

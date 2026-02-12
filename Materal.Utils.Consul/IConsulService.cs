@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Consul.ConfigModels;
+using Materal.Utils.Consul.ConfigModels;
 using Materal.Utils.Consul.Models;
 
 namespace Materal.Utils.Consul

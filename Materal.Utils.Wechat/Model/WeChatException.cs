@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Wechat.Model
+namespace Materal.Utils.Wechat.Model
 {
     /// <summary>
     /// 微信异常

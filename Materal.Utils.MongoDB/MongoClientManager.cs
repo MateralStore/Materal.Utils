@@ -1,4 +1,4 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 using System.Collections.Concurrent;
 
 namespace Materal.Utils.MongoDB;

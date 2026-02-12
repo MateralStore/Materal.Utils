@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Enums;
+namespace Materal.Utils.Enums;
 
 /// <summary>
 /// 拼音模式

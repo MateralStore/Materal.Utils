@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Utilities;
+namespace Materal.Utils.Utilities;
 
 /// <summary>
 /// 相等扩展

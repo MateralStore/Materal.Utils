@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Models;
+using Materal.Utils.Models;
 using Materal.Utils.Models.Attributes;
 using MongoDB.Bson;
 using MongoDB.Driver;

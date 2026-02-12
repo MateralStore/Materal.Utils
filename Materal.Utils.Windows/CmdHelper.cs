@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Windows
+namespace Materal.Utils.Windows
 {
     /// <summary>
     /// Cmd管理器

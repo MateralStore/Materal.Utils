@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Models.Attributes;
+namespace Materal.Utils.Models.Attributes;
 
 /// <summary>
 /// 过滤器特性

@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Network.Http;
+using Materal.Utils.Network.Http;
 
 namespace Materal.Utils.Consul.ConfigModels
 {

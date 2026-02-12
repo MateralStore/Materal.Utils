@@ -1,4 +1,4 @@
-﻿//using Materal.Utils.Email;
+//using Materal.Utils.Email;
 //using System.Net.Mail;
 
 //namespace Materal.Utils.Test;

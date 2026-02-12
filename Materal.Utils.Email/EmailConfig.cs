@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Email;
+namespace Materal.Utils.Email;
 
 /// <summary>
 /// 邮件发送配置

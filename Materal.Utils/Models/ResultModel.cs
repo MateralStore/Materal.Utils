@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Models;
+namespace Materal.Utils.Models;
 
 /// <summary>
 /// 返回模型

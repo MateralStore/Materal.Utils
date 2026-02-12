@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Models.Attributes;
+namespace Materal.Utils.Models.Attributes;
 
 /// <summary>
 /// 忽略转换为ExpandoObject

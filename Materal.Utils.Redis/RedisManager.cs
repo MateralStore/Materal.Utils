@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Enums;
+using Materal.Utils.Enums;
 using StackExchange.Redis;
 using System.Text;
 

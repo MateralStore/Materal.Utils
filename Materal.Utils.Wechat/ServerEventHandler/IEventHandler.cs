@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Wechat.Model;
+using Materal.Utils.Wechat.Model;
 
 namespace Materal.Utils.Wechat.ServerEventHandler
 {

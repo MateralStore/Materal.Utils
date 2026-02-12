@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Wechat.Model.MiniProgram.Request
+namespace Materal.Utils.Wechat.Model.MiniProgram.Request
 {
     /// <summary>
     /// 订阅消息发送请求模型

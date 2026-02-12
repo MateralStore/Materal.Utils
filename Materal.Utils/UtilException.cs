@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils;
+namespace Materal.Utils;
 
 /// <summary>
 /// 工具异常

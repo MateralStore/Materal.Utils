@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 using System.Drawing;
 using ZXing;
 using ZXing.Common;

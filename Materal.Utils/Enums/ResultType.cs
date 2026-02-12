@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Enums;
+namespace Materal.Utils.Enums;
 
 /// <summary>
 /// 返回对象类型

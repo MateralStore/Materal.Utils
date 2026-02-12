@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Models;
+using Materal.Utils.Models;
 
 namespace Materal.Utils.Wechat.Model.OfficialAccount.Request
 {

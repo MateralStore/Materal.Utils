@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Models;
+namespace Materal.Utils.Models;
 
 /// <summary>
 /// 分页请求模型

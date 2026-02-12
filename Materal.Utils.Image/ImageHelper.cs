@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Helpers;
+using Materal.Utils.Helpers;
 using SkiaSharp;
 
 namespace Materal.Utils.Image

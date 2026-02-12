@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Enums;
+using Materal.Utils.Enums;
 
 namespace Materal.Utils.Caching;
 

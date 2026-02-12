@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Consul
+namespace Materal.Utils.Consul
 {
     /// <summary>
     /// Consul异常

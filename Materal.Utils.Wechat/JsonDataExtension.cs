@@ -1,4 +1,4 @@
-﻿using LitJson;
+using LitJson;
 
 namespace Materal.Utils.Wechat
 {

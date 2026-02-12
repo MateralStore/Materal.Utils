@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Redis
+namespace Materal.Utils.Redis
 {
     /// <inheritdoc />
     /// <summary>

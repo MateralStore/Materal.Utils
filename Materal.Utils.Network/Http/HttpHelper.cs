@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Extensions;
+using Materal.Utils.Extensions;
 using System.Net;
 using System.Text;
 

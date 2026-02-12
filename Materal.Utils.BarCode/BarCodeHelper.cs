@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 using ZXing;
 using ZXing.SkiaSharp;
 

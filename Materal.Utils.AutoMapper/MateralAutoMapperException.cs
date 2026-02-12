@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.AutoMapper;
+namespace Materal.Utils.AutoMapper;
 
 /// <summary>
 /// AutoMapper异常

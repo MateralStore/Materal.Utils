@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Wechat.Model.Result
+namespace Materal.Utils.Wechat.Model.Result
 {
     /// <summary>
     /// AccessToken返回模型

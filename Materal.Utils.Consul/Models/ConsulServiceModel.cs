@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Consul.Models
+namespace Materal.Utils.Consul.Models
 {
     /// <summary>
     /// Consule服务模型

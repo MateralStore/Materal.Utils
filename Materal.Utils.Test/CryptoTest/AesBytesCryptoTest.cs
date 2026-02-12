@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Crypto;
+using Materal.Utils.Crypto;
 
 namespace Materal.Utils.Test.CryptoTest;
 

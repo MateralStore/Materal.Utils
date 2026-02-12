@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Wechat.Model.OfficialAccount.Request
+namespace Materal.Utils.Wechat.Model.OfficialAccount.Request
 {
     /// <summary>
     /// 跳转小程序模型

@@ -1,4 +1,4 @@
-﻿using Materal.Abstractions;
+using Materal.Abstractions;
 using System.Text;
 
 namespace Materal.Utils.Network.Http;

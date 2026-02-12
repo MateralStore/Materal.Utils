@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Wechat.Model.Event
+namespace Materal.Utils.Wechat.Model.Event
 {
     /// <summary>
     /// 图片消息事件

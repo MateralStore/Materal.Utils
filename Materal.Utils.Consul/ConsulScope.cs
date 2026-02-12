@@ -1,4 +1,4 @@
-﻿using Consul;
+using Consul;
 using Materal.Utils.Consul.ConfigModels;
 using Materal.Utils.Consul.Models;
 using Materal.Utils.Network.Http;

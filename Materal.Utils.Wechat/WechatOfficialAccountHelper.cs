@@ -1,4 +1,4 @@
-﻿using LitJson;
+using LitJson;
 using Materal.Utils.Wechat.Model;
 using Materal.Utils.Wechat.Model.OfficialAccount.Request;
 using Materal.Utils.Wechat.Model.OfficialAccount.Result;

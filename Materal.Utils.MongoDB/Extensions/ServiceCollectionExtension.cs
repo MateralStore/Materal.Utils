@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.MongoDB.Extensions;
+namespace Materal.Utils.MongoDB.Extensions;
 
 /// <summary>
 /// ServiceCollection扩展

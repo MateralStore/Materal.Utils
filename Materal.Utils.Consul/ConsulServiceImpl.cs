@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Consul.ConfigModels;
+using Materal.Utils.Consul.ConfigModels;
 using Materal.Utils.Consul.Models;
 using Materal.Utils.Network.Http;
 using Microsoft.Extensions.Logging;

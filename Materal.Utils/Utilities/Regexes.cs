@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Utilities;
+namespace Materal.Utils.Utilities;
 
 /// <summary>
 /// 正则表达式数据类

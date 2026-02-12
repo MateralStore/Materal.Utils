@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Wechat.Model.OfficialAccount.Result
+namespace Materal.Utils.Wechat.Model.OfficialAccount.Result
 {
     /// <summary>
     /// 网页授权接口调用凭证结果模型

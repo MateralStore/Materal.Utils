@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Redis
+namespace Materal.Utils.Redis
 {
     /// <summary>
     /// Redis配置模型

@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Windows
+namespace Materal.Utils.Windows
 {
     /// <summary>
     /// 资源管理器帮助类

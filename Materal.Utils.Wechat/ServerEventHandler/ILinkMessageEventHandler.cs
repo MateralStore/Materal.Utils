@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Wechat.ServerEventHandler
+namespace Materal.Utils.Wechat.ServerEventHandler
 {
     /// <summary>
     /// 链接消息事件处理器

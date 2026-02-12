@@ -1,4 +1,4 @@
-﻿using Materal.Utils.Models;
+using Materal.Utils.Models;
 using MongoDB.Driver;
 
 namespace Materal.Utils.MongoDB;

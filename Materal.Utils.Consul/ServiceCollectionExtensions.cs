@@ -1,4 +1,4 @@
-﻿namespace Materal.Utils.Consul
+namespace Materal.Utils.Consul
 {
     /// <summary>
     /// 依赖注入扩展
