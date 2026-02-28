@@ -9,7 +9,7 @@ namespace Materal.Utils.Email;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// 添加Consul工具
+    /// 添加Email工具
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>

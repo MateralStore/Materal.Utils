@@ -1,4 +1,4 @@
-<Project Sdk="MSTest.Sdk/4.0.1">
+<Project Sdk="MSTest.Sdk/4.1.0">
 	<Import Project="../../Common.props" />
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
@@ -11,7 +11,6 @@
 		<ProjectReference Include="..\Materal.Utils.AutoMapper\Materal.Utils.AutoMapper.csproj" />
 		<ProjectReference Include="..\Materal.Utils.BarCode\Materal.Utils.BarCode.csproj" />
 		<ProjectReference Include="..\Materal.Utils.CloudStorage.Tencent\Materal.Utils.CloudStorage.Tencent.csproj" />
-		<ProjectReference Include="..\Materal.Utils.Consul\Materal.Utils.Consul.csproj" />
 		<ProjectReference Include="..\Materal.Utils.Email\Materal.Utils.Email.csproj" />
 		<ProjectReference Include="..\Materal.Utils.Excel\Materal.Utils.Excel.csproj" />
 		<ProjectReference Include="..\Materal.Utils.Image\Materal.Utils.Image.csproj" />
