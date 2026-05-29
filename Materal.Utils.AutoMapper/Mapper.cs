@@ -5,7 +5,7 @@ namespace Materal.Utils.AutoMapper;
 /// <summary>
 /// 映射器
 /// </summary>
-public partial class Mapper : IMapper
+public partial class Mapper : IMapper, IDefaultMapper
 {
     /// <inheritdoc/>
     public IServiceProvider? ServiceProvider { get; }
@@ -80,10 +80,6 @@ public partial class Mapper : IMapper
                 DefaultMap(source, target);
                 return;
             }
-            if (mappingRelation.UseDefaultMapper)
-            {
-                DefaultMap(source, target);
-            }
             mappingRelation.MapObj(this, source, target);
         }
         catch (Exception ex)
@@ -91,4 +87,5 @@ public partial class Mapper : IMapper
             throw new MateralAutoMapperException("映射结果转换失败", ex);
         }
     }
+    void IDefaultMapper.DefaultMap(object source, object target) => DefaultMap(source, target);
 }

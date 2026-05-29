@@ -1,5 +1,9 @@
 namespace Materal.Utils.AutoMapper;
 
+internal interface IDefaultMapper
+{
+    void DefaultMap(object source, object target);
+}
 /// <summary>
 /// 映射关系
 /// </summary>
@@ -48,7 +52,14 @@ public partial class MappingRelation<T1, T2> : MappingRelation
         {
             Map = (mapper, source, target) =>
             {
-                mapper.Map(source!, target!);
+                if (mapper is IDefaultMapper defaultMapper)
+                {
+                    defaultMapper.DefaultMap(source!, target!);
+                }
+                else
+                {
+                    mapper.Map(source!, target!);
+                }
                 map(mapper, source, target);
             };
         }
